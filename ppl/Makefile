@@ -45,7 +45,7 @@ ICFLAGS = \
 -I../itv \
 -I$(GMP_PREFIX)/include -I$(MPFR_PREFIX)/include \
 -I$(PPL_PREFIX)/include \
--I$(CAML_PREFIX)/lib/ocaml -I$(CAMLIDL_PREFIX)/lib/ocaml
+-I$(CAML_DIR) -I$(CAMLIDL_DIR)
 
 ICXXFLAGS = \
 -I../newpolka \
@@ -56,7 +56,7 @@ ICXXFLAGS = \
 -I../itv \
 -I$(GMP_PREFIX)/include -I$(MPFR_PREFIX)/include \
 -I$(PPL_PREFIX)/include \
--I$(CAML_PREFIX)/lib/ocaml -I$(CAMLIDL_PREFIX)/lib/ocaml
+-I$(CAML_DIR) -I$(CAMLIDL_DIR)
 
 # Caml
 OCAMLINC = -I $(MLGMPIDL_LIB) -I ../mlapronidl

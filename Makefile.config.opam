@@ -4,109 +4,46 @@
 # HAS Flags
 ######################################################################
 
-# If defined to non-empty value, generates dynamic libraries.
-# Do not forget to add -fPIC to CFLAGS and CFLAGS_DEBUG
 HAS_SHARED=1
-
-# If defined to non-empty value, compiles the OCaml interface (bytecode)
 HAS_OCAML = 1
-# If defined to non-empty value, compiles the OCaml interface (native code)
 HAS_OCAMLOPT = 1
-
-# If defined to non-empty value, compiles the C++ interface (beta version)
 # HAS_CPP = 1
-
-# If defined to non-empty value, compiles the PPL domain
-# (require included patch to PPL, see ppl/README and ppl/ppl.patch)
-
 # HAS_PPL = 1
-
-# If defined to non-empty value, support for "long double" is enabled
-
 # HAS_LONG_DOUBLE = 1
-
-# If defined to non-empty value, compiles the Java interface
 # HAS_JAVA = 1
 
-# If defined to non-empty value, assumed to be the right executable,
-# use FINDLIB/ocamlfind package system
-# (advised)
 OCAMLFIND = ocamlfind
 
 ######################################################################
 # Directories
 ######################################################################
 
-# Where to install and to find APRON
-# ($(APRON_PREFIX)/include, $(APRON_PREFIX)/lib)
-#
-APRON_PREFIX = /tmp
-
-# Where to install and to find MLGMPIDL
-# ($(MLGMPIDL_PREFIX)/lib)
-# Only if you do not use FINDLIB
+APRON_PREFIX = $(PWD)/_build
 MLGMPIDL_PREFIX = /tmp
-
-# Where to install Java .jar files
-#
 JAVA_PREFIX = /tmp
 
-# Where to find GMP ($(GMP_PREFIX)/include, ($GMP_PREFIX)/lib
-#
 GMP_PREFIX = /usr
-
-# Where to find MPFR ($(MPFR_PREFIX)/include, ($MPFR_PREFIX)/lib
-#
 MPFR_PREFIX = /usr
-
-# Where to find PPL ($(PPL_PREFIX)/include, $(PPL_PREFIX)/lib
-#
 PPL_PREFIX = /usr
-
-# Where to find OCAML library
-#
 CAML_DIR = $(shell ocamlc -where)
-
-# Where to find CAMLIDL's library (usually the same as $(CAML_DIR), or
-# the result of `ocamlfind query camlidl`).
-CAMLIDL_DIR = $(CAML_DIR)
-# CAMLIDL_DIR = $(shell $(OCAMLFIND) query camlidl)
-
-# OPAM_DEVEL_DIR = $(HOME)/prog/opam-devel
+CAMLIDL_DIR = $(shell $(OCAMLFIND) query camlidl)
 
 ######################################################################
 # Java binaries and directories
 ######################################################################
 
-# Java launcher
 JAVA      = java
-
-# Java compiler
 JAVAC     = javac -Xlint:unchecked
-
-# Java header compiler
 JAVAH     = javah
-
-# Java documentation generator
 JAVADOC   = javadoc
-
-# Java archive tool
 JAR       = jar
-
-# preprocessing directives to find JNI headers
 JNIINC    = -I/java/include
 
 ######################################################################
 # Tools and Flags
 ######################################################################
 
-# C compiler
 #CC = gcc
-
-# NOTE: for MACINTOSH (under MacOS 10.6), add in CFLAGS and their variants:
-#
-# -undefined supress -flat_namespace
-#
 
 # C compilation flags
 CFLAGS = \
@@ -132,21 +69,12 @@ CFLAGS_PROF = \
 -std=c99 \
 -fPIC -O3 -DNDEBUG -g -pg
 
-# Examples of CFLAGS
-# CFLAGS = -Wswitch -Werror-implicit-function-declaration -Wall -std=c99	\
-#	   -O3 -DNDEBUG \
-#          -march=pentium-m -mtune=pentium-m -pipe -mmmx -msse -msse2 \
-#	   -mfpmath=sse -ftracer -funit-at-a-time -funroll-loops -fmove-all-movables
-
-# C++ compiler
-#CXX = g++
-# C++ compilation flags
 CXXFLAGS = \
 -Wcast-qual -Wswitch \
 -Wall -Wextra -Wundef -Wcast-align \
 -Wno-unused \
 -fPIC -O3 -DNDEBUG
-# C++ compilation flags in debug (or profile) mode
+
 CXXFLAGS_DEBUG = \
 -Wcast-qual -Wswitch \
 -Wall -Wextra -Wundef -Wcast-align \

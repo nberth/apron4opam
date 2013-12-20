@@ -1,5 +1,5 @@
 description = "Numerical abstract domains"
-version = "0.9.11"
+version = "@VERSION@"
 requires = "apron.apron"
 package "apron" (
 requires = "gmp"

@@ -1,4 +1,6 @@
 include Makefile.config
+PKGNAME = apron
+VERSION_STR = 0.9.11
 
 LCFLAGS = \
 -Lapron -Litv -Lbox -Loctagons -Lnewpolka -Ltaylor1plus \
@@ -118,7 +120,7 @@ OCAMLFIND_FILES += \
 endif
 endif
 
-install:
+install: mlapronidl/META
 	(cd num; make install)
 	(cd itv; make install)
 	(cd apron; make install)
@@ -144,6 +146,16 @@ else
 mlapronidl/apron.d.cmxa mlapronidl/apron.d.a \
 newpolka/polkaMPQ.d.cmxa newpolka/polkaMPQ.d.a \
 newpolka/polkaRll.d.cmxa newpolka/polkaRll.d.a
+
+install-findlib: mlapronidl/META all
+	$(OCAMLFIND) remove apron;
+	$(OCAMLFIND) install apron mlapronidl/META $(OCAMLFIND_FILES)	\
+	  mlapronidl/apron.d.cmxa mlapronidl/apron.d.a			\
+	  newpolka/polkaMPQ.d.cmxa newpolka/polkaMPQ.d.a		\
+	  newpolka/polkaRll.d.cmxa newpolka/polkaRll.d.a;
+
+mlapronidl/META: mlapronidl/META.in
+	sed -e "s!@VERSION@!$(VERSION_STR)!g;" $< > $@;
 
 endif
 endif
@@ -210,18 +222,18 @@ endif
 
 # make distribution, update to reflect current version
 
-PKGNAME  = apron-0.9.11
+PKG  = $(PKGNAME)-$(VERSION_STR)
 PKGFILES = Makefile README README.windows README.mac AUTHORS COPYING Makefile.config.model Changes
 PKGDIRS  = apron num itv octagons box newpolka taylor1plus ppl products mlapronidl examples test apronxx
 
 dist:
 	$(MAKE) all
 	$(MAKE) doc
-	mkdir -p $(PKGNAME)
+	mkdir -p $(PKG)
 	$(MAKE) $(foreach pkg,$(PKGDIRS),pkg_$(pkg))
-	cp $(PKGFILES) $(PKGNAME)
-	tar vczf $(PKGNAME).tgz $(PKGNAME)
-	rm -rf $(PKGNAME)
+	cp $(PKGFILES) $(PKG)
+	tar vczf $(PKG).tgz $(PKG)
+	rm -rf $(PKG)
 
 # these 2 targets are for main developpers only
 index.html: index.tex
@@ -240,5 +252,30 @@ online: doc index.html
 
 pkg_%:
 	(cd $*; $(MAKE) dist)
-	(cd $(PKGNAME); tar xzf ../$*.tgz)
+	(cd $(PKG); tar xzf ../$*.tgz)
 	rm -rf $*.tgz
+
+#-----------------------------------
+# OPAM Packaging
+#-----------------------------------
+
+ifneq ($(OPAM_DEVEL_DIR),)
+
+  OPAM_DIR = opam
+  OPAM_FILES = descr opam
+
+  # XXX: force full cleanup when building opam distribution archive,
+  # to avoid having to select all files manually.
+  DIST_DEPS = distclean
+  DIST_FILES = apron apronxx AUTHORS box Changes COPYING examples	\
+    index.tex itv japron Makefile Makefile.config.* mlapronidl		\
+    newpolka num octagons ppl products README* taylor1plus test
+
+  -include $(OPAM_DEVEL_DIR)/opam-dist.mk
+
+endif
+
+# ---
+
+.PHONY: force
+force:

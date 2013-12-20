@@ -26,7 +26,7 @@ install:
 	cp $(H_FILES) $(APRON_PREFIX)/include
 
 uninstall:
-	(cd $(APRON_PREFIX)/include; /bin/rm -f $(H_FILES))
+	(cd $(APRON_PREFIX)/include && /bin/rm -f $(H_FILES) || exit 0)
 
 dist: $(H_FILES) Makefile README
 	(cd ..; tar zcvf num.tgz $(^:%=num/%))
