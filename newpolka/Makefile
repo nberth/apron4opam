@@ -95,8 +95,8 @@ all: allMPQ allRll
 allMPQ: libpolkaMPQ.a libpolkaMPQ_debug.a
 allRll: libpolkaRll.a libpolkaRll_debug.a
 ifneq ($(HAS_SHARED),)
-allMPQ: libpolkaMPQ.so libpolkaMPQ_debug.so
-allRll: libpolkaRll.so libpolkaRll_debug.so
+# allMPQ: libpolkaMPQ.so libpolkaMPQ_debug.so
+# allRll: libpolkaRll.so libpolkaRll_debug.so
 endif
 
 ml: polka.mli polka.ml polka.cmi mlMPQ mlRll
@@ -220,15 +220,18 @@ test.cmo: test.ml
 # OCaml binding
 #---------------------------------------
 
-libpolka%_caml.a: polka_caml.o libpolka%.a
-	$(AR) rcs $@ $<
-	$(RANLIB) $@
-libpolka%_caml_debug.a: polka_caml_debug.o libpolka%_debug.a
-	$(AR) rcs $@ $<
-	$(RANLIB) $@
+# libpolka%_caml.a: polka_caml.o libpolka%.a
+# 	$(AR) rcs $@ $<
+# 	$(RANLIB) $@
+# libpolka%_caml_debug.a: polka_caml_debug.o libpolka%_debug.a
+# 	$(AR) rcs $@ $<
+# 	$(RANLIB) $@
 
-dllpolka%_caml.so: polka_caml.o libpolka%.so
-	$(CC) $(CFLAGS) -shared -o $@ polka_caml.o -L. -lpolka$* $(LIBS)
+libpolka%_caml.a dllpolka%_caml.so: polka_caml.o libpolka%.a
+	$(OCAMLMKLIB) -verbose -o polka$*_caml polka_caml.o $(LIBS) -L. -lpolka$* -lapron
+
+libpolka%_caml_debug.a dllpolka%_caml_debug.so: polka_caml_debug.o libpolka%_debug.a
+	$(OCAMLMKLIB) -verbose -o polka$*_caml polka_caml_debug.o $(LIBS_DEBUG) -L. -lpolka$*_debug -lapron_debug
 
 #---------------------------------------
 # OCaml rules

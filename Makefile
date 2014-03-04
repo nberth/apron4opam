@@ -1,6 +1,6 @@
 include Makefile.config
 PKGNAME = apron
-VERSION_STR = 0.9.11
+VERSION_STR = 0.9.11-1
 
 LCFLAGS = \
 -Lapron -Litv -Lbox -Loctagons -Lnewpolka -Ltaylor1plus \
@@ -71,13 +71,27 @@ ifneq ($(HAS_OCAML),)
 	(cd products; make rebuild)
 endif
 
-OCAMLFIND_PROTO = xxx.cma xxx.cmxa xxx.a libxxx_caml.a libxxx_caml_debug.a
+# XXX for findlib install:
+OCAMLFIND_PROTO = libxxx.a libxxx_debug.a
+# ifneq ($(HAS_SHARED),)
+# OCAMLFIND_PROTO += libxxx.so libxxx_debug.so
+# endif
+OCAMLFIND_FILES := \
+	$(patsubst %,apron/%, $(subst xxx,apron, $(OCAMLFIND_PROTO)))
+
+OCAMLFIND_PROTO = xxx.cma xxx.cmxa xxx.a libxxx_caml.a
 ifneq ($(HAS_SHARED),)
 OCAMLFIND_PROTO += dllxxx_caml.so
 endif
-OCAMLFIND_FILES = \
+OCAMLFIND_FILES += \
 	$(patsubst %,mlapronidl/%, apron.cmi apron.cmx) \
 	$(patsubst %,mlapronidl/%, $(subst xxx,apron, $(OCAMLFIND_PROTO))) \
+
+OCAMLFIND_PROTO += libxxx.a libxxx_debug.a
+# ifneq ($(HAS_SHARED),)
+# OCAMLFIND_PROTO += libxxx.so
+# endif
+OCAMLFIND_FILES += \
 	$(patsubst %,box/%, box.mli box.cmi box.cmx) \
 	$(patsubst %,box/%, $(subst xxx,boxD, $(OCAMLFIND_PROTO))) \
 	$(patsubst %,box/%, $(subst xxx,boxMPQ, $(OCAMLFIND_PROTO))) \
@@ -120,7 +134,7 @@ OCAMLFIND_FILES += \
 endif
 endif
 
-install: mlapronidl/META
+install: mlapronidl/META all
 	(cd num; make install)
 	(cd itv; make install)
 	(cd apron; make install)
@@ -154,6 +168,27 @@ install-findlib: mlapronidl/META all
 	  newpolka/polkaMPQ.d.cmxa newpolka/polkaMPQ.d.a		\
 	  newpolka/polkaRll.d.cmxa newpolka/polkaRll.d.a;
 
+# SOLIBS = apron apron_debug boxD boxMPFR boxMPQ octD octMPQ polkaMPQ \
+# 	 plokaRll t1pD t1pMPFR t1pMPQ
+
+install-opam: install-findlib
+# ifneq ($(HAS_SHARED),)
+# 	dest="$(shell $(OCAMLFIND) printconf destdir)";			\
+# 	cd $(shell ocamlc -where);	 				\
+# 	for a in $(SOLIBS); do						\
+# 	    ln -sf "$${dest}/stublibs/lib$${a}.so";			\
+# 	done;
+# endif
+
+uninstall-opam:
+# ifneq ($(HAS_SHARED),)
+# 	cd $(shell ocamlc -where);	 				\
+# 	for a in $(SOLIBS); do						\
+# 	  rm -f "lib$${a}.so";						\
+# 	done;
+# endif
+#	 $(OCAMLFIND) remove apron;
+
 mlapronidl/META: mlapronidl/META.in
 	sed -e "s!@VERSION@!$(VERSION_STR)!g;" $< > $@;
 
@@ -180,6 +215,7 @@ clean:
 	rm -fr online tmp apron*run aprontop apronppltop
 
 distclean: clean
+	rm -f mlapronidl/META
 	(cd num; make uninstall)
 	(cd itv; make uninstall)
 	(cd apron; make uninstall)
@@ -262,14 +298,15 @@ pkg_%:
 ifneq ($(OPAM_DEVEL_DIR),)
 
   OPAM_DIR = opam
-  OPAM_FILES = descr opam
+  OPAM_FILES = descr opam files
 
   # XXX: force full cleanup when building opam distribution archive,
   # to avoid having to select all files manually.
   DIST_DEPS = distclean
   DIST_FILES = apron apronxx AUTHORS box Changes COPYING examples	\
     index.tex itv japron Makefile Makefile.config.* mlapronidl		\
-    newpolka num octagons ppl products README* taylor1plus test
+    newpolka num octagons ppl products README* taylor1plus test		\
+    configure
 
   -include $(OPAM_DEVEL_DIR)/opam-dist.mk
 

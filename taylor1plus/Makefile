@@ -95,9 +95,9 @@ allMPQ: libt1pMPQ.a libt1pMPQ_debug.a
 allD: libt1pD.a libt1pD_debug.a
 allMPFR: libt1pMPFR.a libt1pMPFR_debug.a
 ifneq ($(HAS_SHARED),)
-allMPQ: libt1pMPQ.so libt1pMPQ_debug.so
-allD: libt1pD.so libt1pD_debug.so
-allMPFR: libt1pMPFR.so libt1pMPFR_debug.so
+# allMPQ: libt1pMPQ.so libt1pMPQ_debug.so
+# allD: libt1pD.so libt1pD_debug.so
+# allMPFR: libt1pMPFR.so libt1pMPFR_debug.so
 endif
 
 exemple1%_debug: exemple1%_debug.o

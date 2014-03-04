@@ -61,10 +61,12 @@ LIBS = -lm -L$(GMP_PREFIX)/lib -lgmp -L$(MPFR_PREFIX)/lib -lmpfr
 # Rules
 #---------------------------------------
 
-all: libapron.a libapron_debug.a
+LIB_FILES = libapron.a libapron_debug.a
 ifneq ($(HAS_SHARED),)
-all: libapron.so libapron_debug.so
+# LIB_FILES += libapron.so libapron_debug.so
 endif
+
+all: $(LIB_FILES)
 
 #---------------------------------------
 # Misc rules
@@ -88,7 +90,7 @@ install: all
 	mkdir -p $(APRON_PREFIX)/include
 	cp $(H_FILES) $(APRON_PREFIX)/include
 	mkdir -p $(APRON_PREFIX)/lib
-	for i in libapron.a libapron_debug.a libapron.so libapron_debug.so; do if test -f $$i; then $(INSTALL) $$i $(APRON_PREFIX)/lib; fi; done
+	for i in $(LIB_FILES); do if test -f $$i; then $(INSTALL) $$i $(APRON_PREFIX)/lib; fi; done
 
 uninstall:
 	/bin/rm -f $(H_FILES:%=$(APRON_PREFIX)/include/%)

@@ -1,13 +1,18 @@
 opam-version: "1"
-maintainer: "Nicolas.Berthier <@> inria.fr"
-authors: ["Bertrant Jeannet"]
+maintainer: "Nicolas.Berthier@inria.fr"
+authors: ["Bertrant Jeannet" "Antoine Miné"]
 license: "LGPL-v2.1"
 build: [
-  ["cp" "Makefile.config.opam" "Makefile.config"]
+  ["./configure" "--prefix" prefix]
   [make "rebuild"]
-  [make "install-findlib"]
+  [make "install-opam"]
 ]
 remove: [
+# ["./configure" "--prefix" prefix]
+# [make "uninstall-opam"]
   ["ocamlfind" "remove" "apron"]
 ]
 depends: ["ocamlfind" "camlidl" "mlgmpidl"]
+patches: [
+  "lincons-basic-readability.patch"
+]
