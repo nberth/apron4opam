@@ -13,6 +13,7 @@ HAS_OCAMLOPT = 1
 # HAS_JAVA = 1
 
 OCAMLFIND = ocamlfind
+OCAMLPACK = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/ocamlpack
 
 ######################################################################
 # Directories

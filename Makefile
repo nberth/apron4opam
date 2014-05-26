@@ -1,6 +1,6 @@
 include Makefile.config
 PKGNAME = apron
-VERSION_STR = 0.9.11-1
+VERSION_STR = 0.9.11-2
 
 LCFLAGS = \
 -Lapron -Litv -Lbox -Loctagons -Lnewpolka -Ltaylor1plus \
@@ -306,7 +306,7 @@ ifneq ($(OPAM_DEVEL_DIR),)
   DIST_FILES = apron apronxx AUTHORS box Changes COPYING examples	\
     index.tex itv japron Makefile Makefile.config.* mlapronidl		\
     newpolka num octagons ppl products README* taylor1plus test		\
-    configure
+    configure ocamlpack
 
   -include $(OPAM_DEVEL_DIR)/opam-dist.mk
 

@@ -1,7 +1,7 @@
 opam-version: "1"
 maintainer: "Nicolas.Berthier@inria.fr"
 authors: ["Bertrant Jeannet" "Antoine Miné"]
-license: "LGPL-v2.1"
+license: "LGPL-2.1"
 build: [
   ["./configure" "--prefix" prefix]
   [make "rebuild"]

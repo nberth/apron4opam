@@ -184,7 +184,7 @@ apron_parser.ml apron_parser.mli: apron_parser.mly
 
 .PHONY: html
 apron_ocamldoc.mli: introduction.odoc $(MLMODULES:%=%.mli)
-	$(OCAMLPACK) -o apron_ocamldoc -title "APRON library" -intro introduction.odoc -intf $(MLMODULES)
+	sh $(OCAMLPACK) -o $@ -title "APRON Library" -intro introduction.odoc $(MLMODULES)
 	$(SED) -i -e 's/{5/{6/g;s/{4/{5/g;s/{3/{4/g;s/{2/{3/g;s/{1/{2/g' $@
 
 mlapronidl.pdf: mlapronidl.dvi

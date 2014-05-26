@@ -33,6 +33,8 @@ HAS_OCAMLOPT = 1
 # (advised)
 OCAMLFIND = ocamlfind
 
+OCAMLPACK = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/ocamlpack
+
 ######################################################################
 # Directories
 ######################################################################
