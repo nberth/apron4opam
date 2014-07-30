@@ -8,6 +8,12 @@
 # Do not forget to add -fPIC to CFLAGS and CFLAGS_DEBUG
 HAS_SHARED=1
 
+# If defined to non-empty value (along with HAS_SHARED), then build
+# and install shared versions of the libraries. Note that in this
+# case, $(APRON_PREIFX)/lib (see bellow) must then be inserted into
+# LD_LIBRARY_PATH.
+INSTALL_SHARED = 1
+
 # If defined to non-empty value, compiles the OCaml interface (bytecode)
 HAS_OCAML = 1
 # If defined to non-empty value, compiles the OCaml interface (native code)
@@ -32,8 +38,6 @@ HAS_OCAMLOPT = 1
 # use FINDLIB/ocamlfind package system
 # (advised)
 OCAMLFIND = ocamlfind
-
-OCAMLPACK = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/ocamlpack
 
 ######################################################################
 # Directories
@@ -73,8 +77,6 @@ CAML_DIR = $(shell ocamlc -where)
 # the result of `ocamlfind query camlidl`).
 CAMLIDL_DIR = $(CAML_DIR)
 # CAMLIDL_DIR = $(shell $(OCAMLFIND) query camlidl)
-
-# OPAM_DEVEL_DIR = $(HOME)/prog/opam-devel
 
 ######################################################################
 # Java binaries and directories
@@ -184,3 +186,5 @@ DVIPDF=dvipdf
 MAKEINDEX=makeindex
 TEXI2DVI=texi2dvi
 TEXI2HTML=texi2html
+
+OCAMLPACK = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/ocamlpack

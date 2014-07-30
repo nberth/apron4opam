@@ -51,10 +51,10 @@ CCBIN_TO_INSTALL =
 CCLIB_TO_INSTALL = \
 libboxMPQ.a libboxD.a libboxMPFR.a \
 libboxMPQ_debug.a libboxD_debug.a libboxMPFR_debug.a
-ifneq ($(HAS_SHARED),)
-# CCLIB_TO_INSTALL := $(CCLIB_TO_INSTALL) \
-# libboxMPQ.so libboxD.so libboxMPFR.so \
-# libboxMPQ_debug.so libboxD_debug.so libboxMPFR_debug.so
+ifneq ($(INSTALL_SHARED),)
+CCLIB_TO_INSTALL := $(CCLIB_TO_INSTALL) \
+libboxMPQ.so libboxD.so libboxMPFR.so \
+libboxMPQ_debug.so libboxD_debug.so libboxMPFR_debug.so
 endif
 CAML_TO_INSTALL = \
 box.idl box.ml box.mli box.cmi \
@@ -89,10 +89,10 @@ all: allMPQ allD allMPFR
 allMPQ: libboxMPQ.a libboxMPQ_debug.a
 allD: libboxD.a libboxD_debug.a
 allMPFR: libboxMPFR.a libboxMPFR_debug.a
-ifneq ($(HAS_SHARED),)
-# allMPQ: libboxMPQ.so libboxMPQ_debug.so
-# allD: libboxD.so libboxD_debug.so
-# allMPFR: libboxMPFR.so libboxMPFR_debug.so
+ifneq ($(INSTALL_SHARED),)
+allMPQ: libboxMPQ.so libboxMPQ_debug.so
+allD: libboxD.so libboxD_debug.so
+allMPFR: libboxMPFR.so libboxMPFR_debug.so
 endif
 
 ml: box.mli box.ml box.cmi mlMPQ mlD mlMPFR
@@ -199,21 +199,18 @@ libbox%_debug.so: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
 # OCaml binding
 #---------------------------------------
 
-libbox%_caml.a: box_caml.o libbox%.a
-	$(AR) rcs $@ $<
-	$(RANLIB) $@
-libbox%_caml_debug.a: box_caml_debug.o libbox%_debug.a
-	$(AR) rcs $@ $<
-	$(RANLIB) $@
+# libbox%_caml.a: box_caml.o libbox%.a
+# 	$(AR) rcs $@ $<
+# 	$(RANLIB) $@
+# libbox%_caml_debug.a: box_caml_debug.o libbox%_debug.a
+# 	$(AR) rcs $@ $<
+# 	$(RANLIB) $@
 
-# dllbox%_caml.so: box_caml.o libbox%.so
-# 	$(CC) $(CFLAGS) -shared -o $@ box_caml.o -L. -lbox$* $(LIBS) -L../apron
 libbox%_caml.a dllbox%_caml.so: box_caml.o libbox%.a
-#	$(CC) $(CFLAGS) -shared -o $@ box_caml.o -L. -lbox$* $(LIBS)
 	$(OCAMLMKLIB) -verbose -o box$*_caml box_caml.o $(LIBS) -L. -lbox$* -lapron
 
 libbox%_caml_debug.a dllbox%_caml_debug.so: box_caml_debug.o libbox%_debug.a
-	$(OCAMLMKLIB) -verbose -o box$*_caml box_caml_debug.o $(LIBS_DEBUG) -L. -lbox$*_debug -lapron_debug
+	$(OCAMLMKLIB) -verbose -o box$*_caml_debug box_caml_debug.o $(LIBS_DEBUG) -L. -lbox$*_debug -lapron_debug
 
 box_caml.o: box_caml.c
 	$(CC) $(CFLAGS) $(ICFLAGS) -I../apron -DNUM_MPQ -c -o $@ $<

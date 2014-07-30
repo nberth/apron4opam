@@ -54,7 +54,7 @@ CCBIN_TO_INSTALL =
 CCLIB_TO_INSTALL = \
 libt1pMPQ.a libt1pD.a libt1pMPFR.a \
 libt1pMPQ_debug.a libt1pD_debug.a libt1pMPFR_debug.a
-ifneq ($(HAS_SHARED),)
+ifneq ($(INSTALL_SHARED),)
 CCLIB_TO_INSTALL := $(CCLIB_TO_INSTALL) \
 libt1pMPQ.so libt1pD.so libt1pMPFR.so \
 libt1pMPQ_debug.so libt1pD_debug.so libt1pMPFR_debug.so
@@ -94,10 +94,10 @@ all: allMPQ allD allMPFR
 allMPQ: libt1pMPQ.a libt1pMPQ_debug.a
 allD: libt1pD.a libt1pD_debug.a
 allMPFR: libt1pMPFR.a libt1pMPFR_debug.a
-ifneq ($(HAS_SHARED),)
-# allMPQ: libt1pMPQ.so libt1pMPQ_debug.so
-# allD: libt1pD.so libt1pD_debug.so
-# allMPFR: libt1pMPFR.so libt1pMPFR_debug.so
+ifneq ($(INSTALL_SHARED),)
+allMPQ: libt1pMPQ.so libt1pMPQ_debug.so
+allD: libt1pD.so libt1pD_debug.so
+allMPFR: libt1pMPFR.so libt1pMPFR_debug.so
 endif
 
 exemple1%_debug: exemple1%_debug.o

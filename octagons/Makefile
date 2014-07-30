@@ -60,8 +60,8 @@ CCINC = oct_internal.h oct_fun.h
 # trigers a whole recompilation
 #DEPS = $(APRON_PREFIX)/include/ap_abstract0.h
 
-LIBS = -L../apron -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
-LIBS_DEBUG = -L../apron -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
+LIBS = -L../apron -L$(APRON_PREFIX) -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
+LIBS_DEBUG = -L../apron -L$(APRON_PREFIX) -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
 
 #---------------------------------------
 # Rules
@@ -105,16 +105,16 @@ MPQ: liboctMPQ.a liboctMPQ_debug.a octtestMPQ
 D: liboctD.a liboctD_debug.a octtestD
 Dl: liboctDl.a liboctDl_debug.a octtestDl
 MPFR: liboctMPFR.a liboctMPFR_debug.a octtestMPFR
-ifneq ($(HAS_SHARED),)
-# Il: liboctIl.so liboctIl_debug.so
-# Ill: liboctIll.so liboctIll_debug.so
-# MPZ: liboctMPZ.so liboctMPZ_debug.so
-# Ri: liboctRi.so liboctRi_debug.so
-# Rll: liboctRll.so liboctRll_debug.so
-# MPQ: liboctMPQ.so liboctMPQ_debug.so
-# D: liboctD.so liboctD_debug.so
-# Dl: liboctDl.so liboctDl_debug.so
-# MPFR: liboctMPFR.so liboctMPFR_debug.so
+ifneq ($(INSTALL_SHARED),)
+Il: liboctIl.so liboctIl_debug.so
+Ill: liboctIll.so liboctIll_debug.so
+MPZ: liboctMPZ.so liboctMPZ_debug.so
+Ri: liboctRi.so liboctRi_debug.so
+Rll: liboctRll.so liboctRll_debug.so
+MPQ: liboctMPQ.so liboctMPQ_debug.so
+D: liboctD.so liboctD_debug.so
+Dl: liboctDl.so liboctDl_debug.so
+MPFR: liboctMPFR.so liboctMPFR_debug.so
 endif
 
 mlexample%.byte: mlexample.ml oct%.cma
@@ -297,20 +297,11 @@ oct%.cma: oct.cmi oct.cmo liboct%_caml.a liboct%.a
 oct%.cmxa oct%.a: oct.cmi oct.cmx liboct%_caml.a liboct%.a
 	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o oct$* -oc oct$*_caml oct.cmx -L. -loct$* $(LIBS) -L../apron
 
-# liboct%_caml.a: oct_caml.o liboct%.a
-# 	$(AR) rcs $@ $<
-# 	$(RANLIB) $@
-# liboct%_caml_debug.a: oct_caml_debug.o liboct%_debug.a
-# 	$(AR) rcs $@ $<
-# 	$(RANLIB) $@
-# dlloct%_caml.so: oct_caml.o liboct%.so
-# 	$(CC) $(CFLAGS) -shared -o $@ oct_caml.o -L. -loct$* $(LIBS)
-
 liboct%_caml.a dlloct%_caml.so: oct_caml.o liboct%.a
 	$(OCAMLMKLIB) -verbose -o oct$*_caml oct_caml.o $(LIBS) -L. -loct$* -lapron
 
 liboct%_caml_debug.a dlloct%_caml_debug.so: oct_caml_debug.o liboct%_debug.a
-	$(OCAMLMKLIB) -verbose -o oct$*_caml oct_caml_debug.o $(LIBS_DEBUG) -L. -loct$*_debug -lapron_debug
+	$(OCAMLMKLIB) -verbose -o oct$*_caml_debug oct_caml_debug.o $(LIBS_DEBUG) -L. -loct$*_debug -lapron_debug
 
 rebuild: oct.idl
 	mkdir -p tmp

@@ -1,6 +1,6 @@
 include Makefile.config
 PKGNAME = apron
-VERSION_STR = 0.9.11-2
+VERSION_STR = 0.9.11-3
 
 LCFLAGS = \
 -Lapron -Litv -Lbox -Loctagons -Lnewpolka -Ltaylor1plus \
@@ -71,27 +71,21 @@ ifneq ($(HAS_OCAML),)
 	(cd products; make rebuild)
 endif
 
-# XXX for findlib install:
-OCAMLFIND_PROTO = libxxx.a libxxx_debug.a
-# ifneq ($(HAS_SHARED),)
-# OCAMLFIND_PROTO += libxxx.so libxxx_debug.so
-# endif
-OCAMLFIND_FILES := \
-	$(patsubst %,apron/%, $(subst xxx,apron, $(OCAMLFIND_PROTO)))
-
-OCAMLFIND_PROTO = xxx.cma xxx.cmxa xxx.a libxxx_caml.a
-ifneq ($(HAS_SHARED),)
-OCAMLFIND_PROTO += dllxxx_caml.so
+OCAMLFIND_PROTO_BASE = libxxx.a libxxx_debug.a
+ifneq ($(INSTALL_SHARED),)
+  OCAMLFIND_PROTO_BASE += libxxx.so libxxx_debug.so
 endif
-OCAMLFIND_FILES += \
-	$(patsubst %,mlapronidl/%, apron.cmi apron.cmx) \
-	$(patsubst %,mlapronidl/%, $(subst xxx,apron, $(OCAMLFIND_PROTO))) \
 
-OCAMLFIND_PROTO += libxxx.a libxxx_debug.a
-# ifneq ($(HAS_SHARED),)
-# OCAMLFIND_PROTO += libxxx.so
-# endif
-OCAMLFIND_FILES += \
+OCAMLFIND_PROTO_ML = xxx.cma xxx.cmxa xxx.a libxxx_caml.a libxxx_caml_debug.a
+ifneq ($(HAS_SHARED),)
+  OCAMLFIND_PROTO_ML += dllxxx_caml.so
+endif
+
+OCAMLFIND_PROTO = $(OCAMLFIND_PROTO_BASE) $(OCAMLFIND_PROTO_ML)
+OCAMLFIND_FILES = \
+	$(patsubst %,apron/%, $(subst xxx,apron, $(OCAMLFIND_PROTO_BASE))) \
+	$(patsubst %,mlapronidl/%, apron.cmi apron.cmx) \
+	$(patsubst %,mlapronidl/%, $(subst xxx,apron, $(OCAMLFIND_PROTO_ML))) \
 	$(patsubst %,box/%, box.mli box.cmi box.cmx) \
 	$(patsubst %,box/%, $(subst xxx,boxD, $(OCAMLFIND_PROTO))) \
 	$(patsubst %,box/%, $(subst xxx,boxMPQ, $(OCAMLFIND_PROTO))) \
@@ -107,9 +101,9 @@ OCAMLFIND_FILES += \
 	$(patsubst %,taylor1plus/%, $(subst xxx,t1pMPQ, $(OCAMLFIND_PROTO))) \
 	$(patsubst %,taylor1plus/%, $(subst xxx,t1pMPFR, $(OCAMLFIND_PROTO))) \
 	$(patsubst %,mlapronidl/%.idl, scalar interval coeff \
-dim linexpr0 lincons0 generator0 texpr0 tcons0 manager abstract0 \
-var environment linexpr1 lincons1 generator1 texpr1 tcons1 abstract1 policy \
-disjunction) \
+	  dim linexpr0 lincons0 generator0 texpr0 tcons0 manager abstract0 \
+	  var environment linexpr1 lincons1 generator1 texpr1 tcons1 abstract1 policy \
+	  disjunction) \
 	mlapronidl/apron_caml.h
 
 ifneq ($(HAS_PPL),)
@@ -155,39 +149,20 @@ ifneq ($(HAS_PPL),)
 	if test -f apronppltop; then $(INSTALL) apronppltop $(APRON_PREFIX)/bin; fi
 endif
 else
-	$(OCAMLFIND) remove apron
+	-$(OCAMLFIND) remove apron
 	$(OCAMLFIND) install apron mlapronidl/META $(OCAMLFIND_FILES) \
-mlapronidl/apron.d.cmxa mlapronidl/apron.d.a \
-newpolka/polkaMPQ.d.cmxa newpolka/polkaMPQ.d.a \
-newpolka/polkaRll.d.cmxa newpolka/polkaRll.d.a
+	  mlapronidl/apron.d.cmxa mlapronidl/apron.d.a \
+	  newpolka/polkaMPQ.d.cmxa newpolka/polkaMPQ.d.a \
+	  newpolka/polkaRll.d.cmxa newpolka/polkaRll.d.a \
+	  $(OCAMLFIND_EXTRA)
 
 install-findlib: mlapronidl/META all
-	$(OCAMLFIND) remove apron;
+	-$(OCAMLFIND) remove apron;
 	$(OCAMLFIND) install apron mlapronidl/META $(OCAMLFIND_FILES)	\
 	  mlapronidl/apron.d.cmxa mlapronidl/apron.d.a			\
 	  newpolka/polkaMPQ.d.cmxa newpolka/polkaMPQ.d.a		\
-	  newpolka/polkaRll.d.cmxa newpolka/polkaRll.d.a;
-
-# SOLIBS = apron apron_debug boxD boxMPFR boxMPQ octD octMPQ polkaMPQ \
-# 	 plokaRll t1pD t1pMPFR t1pMPQ
-
-install-opam: install-findlib
-# ifneq ($(HAS_SHARED),)
-# 	dest="$(shell $(OCAMLFIND) printconf destdir)";			\
-# 	cd $(shell ocamlc -where);	 				\
-# 	for a in $(SOLIBS); do						\
-# 	    ln -sf "$${dest}/stublibs/lib$${a}.so";			\
-# 	done;
-# endif
-
-uninstall-opam:
-# ifneq ($(HAS_SHARED),)
-# 	cd $(shell ocamlc -where);	 				\
-# 	for a in $(SOLIBS); do						\
-# 	  rm -f "lib$${a}.so";						\
-# 	done;
-# endif
-#	 $(OCAMLFIND) remove apron;
+	  newpolka/polkaRll.d.cmxa newpolka/polkaRll.d.a		\
+	  $(OCAMLFIND_EXTRA)
 
 mlapronidl/META: mlapronidl/META.in
 	sed -e "s!@VERSION@!$(VERSION_STR)!g;" $< > $@;
@@ -306,7 +281,7 @@ ifneq ($(OPAM_DEVEL_DIR),)
   DIST_FILES = apron apronxx AUTHORS box Changes COPYING examples	\
     index.tex itv japron Makefile Makefile.config.* mlapronidl		\
     newpolka num octagons ppl products README* taylor1plus test		\
-    configure ocamlpack
+    ocamlpack
 
   -include $(OPAM_DEVEL_DIR)/opam-dist.mk
 

@@ -1,18 +1,18 @@
 opam-version: "1"
 maintainer: "Nicolas.Berthier@inria.fr"
 authors: ["Bertrant Jeannet" "Antoine Miné"]
+homepage: "http://apron.cri.ensmp.fr/library/"
 license: "LGPL-2.1"
 build: [
-  ["./configure" "--prefix" prefix]
+  ["sh" "-c" "echo \"APRON_PREFIX = %{prefix}%\" >> Makefile.config"]
   [make "rebuild"]
-  [make "install-opam"]
+  [make "install-findlib"]
 ]
 remove: [
-# ["./configure" "--prefix" prefix]
-# [make "uninstall-opam"]
   ["ocamlfind" "remove" "apron"]
 ]
 depends: ["ocamlfind" "camlidl" "mlgmpidl"]
 patches: [
   "lincons-basic-readability.patch"
 ]
+os: ["linux"]

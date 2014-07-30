@@ -26,11 +26,6 @@ OCAMLINC = -I $(MLGMPIDL_LIB)
 #---------------------------------------
 # C part
 #---------------------------------------
-# ICFLAGS = \
-# -I$(MLGMPIDL_INCLUDE) -I../apron \
-# -I$(GMP_PREFIX)/include \
-# -I$(MPFR_PREFIX)/include \
-# -I$(CAML_DIR) -I$(CAMLIDL_DIR)
 ICFLAGS = \
 -I $(MLGMPIDL_INCLUDE) -I ../apron \
 -I $(GMP_PREFIX)/include \
@@ -75,8 +70,8 @@ CCLIB_TOINSTALL += dllapron_caml.so
 endif
 CCINC_TOINSTALL = apron_caml.h
 
-LIBS = -L$(APRON_PREFIX)/lib -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
-LIBS_DEBUG = -L$(APRON_PREFIX)/lib -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
+LIBS = -L../apron -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
+LIBS_DEBUG = -L../apron -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
 
 #---------------------------------------
 # Rules
@@ -144,23 +139,12 @@ apron.cmxa apron.a: apron.cmx libapron_caml.a
 apron.d.cmxa apron.d.a: apron.cmx libapron_caml_debug.a
 	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o apron.d -oc apron_caml_debug apron.cmx $(LIBS_DEBUG) -L../apron
 
-# libapron_caml.a: $(CCMODULES:%=%.o)
-# 	$(AR) rc $@ $^
-# 	$(RANLIB) $@
-# libapron_caml_debug.a: $(CCMODULES:%=%_debug.o)
-# 	$(AR) rc $@ $^
-# 	$(RANLIB) $@
-
 libapron_caml.a: dllapron_caml.so
-# dllapron_caml.so: $(CCMODULES:%=%.o) ../apron/libapron.so
 dllapron_caml.so: $(CCMODULES:%=%.o)
-#	$(CC) $(CFLAGS) -o $@ $(CCMODULES:%=%.o) $(LIBS) -L../apron
 	$(OCAMLMKLIB) -verbose $(CCMODULES:%=%.o) $(LIBS) -L../apron -o apron_caml
-#	$(CC) $(CFLAGS) -shared -o $@ $(CCMODULES:%=%.o) $(LIBS) -L../apron
 
 libapron_caml_debug.a: dllapron_caml_debug.so
 dllapron_caml_debug.so: $(CCMODULES:%=%_debug.o)
-#	$(CC) $(CFLAGS) -o $@ $(CCMODULES:%=%.o) $(LIBS) -L../apron
 	$(OCAMLMKLIB) -verbose $(CCMODULES:%=%_debug.o) $(LIBS) -L../apron -o apron_caml_debug
 
 #---------------------------------------
@@ -214,10 +198,8 @@ html: mlapronidl.odoc introduction.mli $(IDLMODULES:%=%.mli) parser.mli $(MLMODU
 #---------------------------------------
 
 %.o: %.c apron_caml.h
-#	$(CC) $(CFLAGS) $(ICFLAGS) -fPIC -c $<
 	$(OCAMLC) -ccopt "$(CFLAGS)" $(ICFLAGS) -c $<
 %_debug.o: %.c apron_caml.h
-#	 $(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -fPIC -c -o $@ $<
 	$(OCAMLC) -ccopt "-o $@ $(CFLAGS) -g" $(ICFLAGS) -c $<
 
 #---------------------------------------

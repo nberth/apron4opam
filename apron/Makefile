@@ -62,8 +62,8 @@ LIBS = -lm -L$(GMP_PREFIX)/lib -lgmp -L$(MPFR_PREFIX)/lib -lmpfr
 #---------------------------------------
 
 LIB_FILES = libapron.a libapron_debug.a
-ifneq ($(HAS_SHARED),)
-# LIB_FILES += libapron.so libapron_debug.so
+ifneq ($(INSTALL_SHARED),)
+LIB_FILES += libapron.so libapron_debug.so
 endif
 
 all: $(LIB_FILES)

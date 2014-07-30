@@ -77,7 +77,7 @@ LIBS_DEBUG = -L$(PPL_PREFIX)/lib -lppl -L$(APRON_PREFIX) -lapron_debug -L$(GMP_P
 #---------------------------------------
 
 all: libap_ppl.a libap_ppl_debug.a ap_ppl_test
-ifneq ($(HAS_SHARED),)
+ifneq ($(INSTALL_SHARED),)
 all: libap_ppl.so libap_ppl_debug.so
 endif
 
