@@ -39,7 +39,7 @@ echo "*)";
 for i in $*; do
      name=$i
 # 1.A Look for the first (** *) comment, and output it
-     gawk -v name=$name '
+     awk -v name=$name '
 BEGIN {
    start=1
    nb = split(name, dirname, "/")
@@ -68,7 +68,7 @@ END {
 }
 '	$i.mli;
 # 1.B Output the rest of name.mli to out
-	gawk -v name=$name '
+	awk -v name=$name '
 {
    if (start==1) {
      match($0, /\(\*\*([ ]+)([^*]*)([ ]+)\*\)/ )

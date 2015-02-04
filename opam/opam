@@ -4,7 +4,7 @@ authors: ["Bertrant Jeannet" "Antoine Miné"]
 homepage: "http://apron.cri.ensmp.fr/library/"
 license: "LGPL-2.1"
 build: [
-  ["sh" "-c" "echo \"APRON_PREFIX = %{prefix}%\" >> Makefile.config"]
+  ["sh" "./configure" "--prefix" prefix]
   [make "rebuild"]
   [make "install-findlib"]
 ]
@@ -15,4 +15,8 @@ depends: ["ocamlfind" "camlidl" "mlgmpidl"]
 patches: [
   "lincons-basic-readability.patch"
 ]
-os: ["linux"]
+os: ["linux" "freebsd" "osx" "darwin"]
+depexts: [
+  [["freebsd"] ["devel/m4" "textproc/gsed" "lang/gawk"]]
+#  [["darwin"]     [?]]
+]
