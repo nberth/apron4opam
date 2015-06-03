@@ -43,7 +43,7 @@ ICFLAGS = \
 -I../num \
 -I../itv \
 -I$(MPFR_PREFIX)/include -I$(GMP_PREFIX)/include \
--I$(CAML_DIR) -I$(CAMLIDL_DIR)
+-I$(CAML_PREFIX) -I$(CAMLIDL_PREFIX)
 
 # Caml
 OCAMLINC = -I $(MLGMPIDL_LIB) -I ../mlapronidl

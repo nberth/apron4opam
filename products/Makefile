@@ -25,7 +25,7 @@ ICFLAGS = \
 -I../ppl \
 -I../mlapronidl \
 -I$(GMP_PREFIX)/include -I$(MPFR_PREFIX)/include \
--I$(CAMLIDL_DIR) -I$(CAML_DIR)
+-I$(CAMLIDL_PREFIX) -I$(CAML_PREFIX)
 
 # Caml
 OCAMLINC = -I $(MLGMPIDL_LIB) -I ../mlapronidl -I ../newpolka -I ../ppl

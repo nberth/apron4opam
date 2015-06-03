@@ -8,12 +8,6 @@
 # Do not forget to add -fPIC to CFLAGS and CFLAGS_DEBUG
 HAS_SHARED=1
 
-# If defined to non-empty value (along with HAS_SHARED), then build
-# and install shared versions of the libraries. Note that in this
-# case, $(APRON_PREIFX)/lib (see bellow) must then be inserted into
-# LD_LIBRARY_PATH.
-INSTALL_SHARED = 1
-
 # If defined to non-empty value, compiles the OCaml interface (bytecode)
 HAS_OCAML = 1
 # If defined to non-empty value, compiles the OCaml interface (native code)
@@ -69,14 +63,13 @@ MPFR_PREFIX = /usr
 #
 PPL_PREFIX = /usr
 
-# Where to find OCAML library
+# Where to find OCAML ($(CAML_PREFIX)/bin, $(CAML_PREFIX)/lib/ocaml, ...)
 #
-CAML_DIR = $(shell ocamlc -where)
+CAML_PREFIX = `ocamlfind printconf stdlib`
 
-# Where to find CAMLIDL's library (usually the same as $(CAML_DIR), or
-# the result of `ocamlfind query camlidl`).
-CAMLIDL_DIR = $(CAML_DIR)
-# CAMLIDL_DIR = $(shell $(OCAMLFIND) query camlidl)
+# Where to find CAMLIDL
+#
+CAMLIDL_PREFIX = `ocamlfind query camlidl`
 
 ######################################################################
 # Java binaries and directories
@@ -116,7 +109,7 @@ JNIINC    = -I/java/include
 CFLAGS = \
 -Wcast-qual -Wswitch -Werror-implicit-function-declaration \
 -Wall -Wextra -Wundef -Wbad-function-cast -Wcast-align -Wstrict-prototypes \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -std=c99 -U__STRICT_ANSI__ \
 -fPIC -O3 -DNDEBUG
 
@@ -124,7 +117,7 @@ CFLAGS = \
 CFLAGS_DEBUG = \
 -Wcast-qual -Wswitch -Werror-implicit-function-declaration \
 -Wall -Wextra -Wundef -Wbad-function-cast -Wcast-align -Wstrict-prototypes \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -std=c99  -U__STRICT_ANSI__ \
 -fPIC -g -O0 -UNDEBUG
 
@@ -132,7 +125,7 @@ CFLAGS_DEBUG = \
 CFLAGS_PROF = \
 -Wcast-qual -Wswitch -Werror-implicit-function-declaration \
 -Wall -Wextra -Wundef -Wbad-function-cast -Wcast-align -Wstrict-prototypes \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -std=c99 \
 -fPIC -O3 -DNDEBUG -g -pg
 
@@ -148,13 +141,13 @@ CFLAGS_PROF = \
 CXXFLAGS = \
 -Wcast-qual -Wswitch \
 -Wall -Wextra -Wundef -Wcast-align \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -fPIC -O3 -DNDEBUG
 # C++ compilation flags in debug (or profile) mode
 CXXFLAGS_DEBUG = \
 -Wcast-qual -Wswitch \
 -Wall -Wextra -Wundef -Wcast-align \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -fPIC -g -O0 -UNDEBUG
 
 AR = ar
@@ -173,9 +166,9 @@ OCAMLFLAGS = -g
 OCAMLOPTFLAGS = -inline 20
 
 OCAMLDEP = ocamldep
-OCAMLLEX = ocamllex.opt
+OCAMLLEX = ocamllex
 OCAMLYACC = ocamlyacc
-OCAMLDOC = ocamldoc.opt
+OCAMLDOC = ocamldoc
 OCAMLMKTOP = ocamlmktop
 OCAMLMKLIB = ocamlmklib
 

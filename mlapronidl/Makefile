@@ -27,10 +27,10 @@ OCAMLINC = -I $(MLGMPIDL_LIB)
 # C part
 #---------------------------------------
 ICFLAGS = \
--I $(MLGMPIDL_INCLUDE) -I ../apron \
--I $(GMP_PREFIX)/include \
--I $(MPFR_PREFIX)/include \
--I $(CAML_DIR) -I $(CAMLIDL_DIR)
+-I$(MLGMPIDL_INCLUDE) -I../apron \
+-I$(GMP_PREFIX)/include \
+-I$(MPFR_PREFIX)/include \
+-I$(CAML_PREFIX) -I$(CAMLIDL_PREFIX)
 
 #---------------------------------------
 # Files
@@ -70,8 +70,8 @@ MLLIB_TOINSTALL += dllapron_caml.so
 endif
 CCINC_TOINSTALL = apron_caml.h
 
-LIBS = -L../apron -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
-LIBS_DEBUG = -L../apron -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
+LIBS = -L$(APRON_PREFIX)/lib -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
+LIBS_DEBUG = -L$(APRON_PREFIX)/lib -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
 
 #---------------------------------------
 # Rules
@@ -148,7 +148,7 @@ libapron_caml.a: dllapron_caml.so
 dllapron_caml.so: $(CCMODULES:%=%.o)
 	$(OCAMLMKLIB) -verbose $(CCMODULES:%=%.o) $(LIBS) -L../apron -o apron_caml
 
-libapron_caml_debug.a: dllapron_caml_debug.so
+libapron_caml_debug.a: dllapron_caml_debug.so ../apron/libapron.so
 dllapron_caml_debug.so: $(CCMODULES:%=%_debug.o)
 	$(OCAMLMKLIB) -verbose $(CCMODULES:%=%_debug.o) $(LIBS) -L../apron -o apron_caml_debug
 
@@ -203,9 +203,9 @@ html: mlapronidl.odoc introduction.mli $(IDLMODULES:%=%.mli) parser.mli $(MLMODU
 #---------------------------------------
 
 %.o: %.c apron_caml.h
-	$(OCAMLC) -ccopt "$(CFLAGS)" $(ICFLAGS) -c $<
+	$(OCAMLC) -ccopt "$(CFLAGS) -fPIC" $(ICFLAGS) -c $<
 %_debug.o: %.c apron_caml.h
-	$(OCAMLC) -ccopt "-o $@ $(CFLAGS) -g" $(ICFLAGS) -c $<
+	$(OCAMLC) -ccopt "-o $@ $(CFLAGS) -g -fPIC" $(ICFLAGS) -c $<
 
 #---------------------------------------
 # IDL generic rules

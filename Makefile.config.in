@@ -12,10 +12,6 @@ HAS_OCAMLOPT = 1
 # HAS_LONG_DOUBLE = 1
 # HAS_JAVA = 1
 
-# Installation of shared libraries is disabled to avoid having to
-# insert the stublibs directory into the LD_LIBRARY_PATH.
-INSTALL_SHARED =
-
 OCAMLFIND = ocamlfind
 
 ######################################################################
@@ -28,8 +24,8 @@ JAVA_PREFIX = /tmp
 GMP_PREFIX = /usr
 MPFR_PREFIX = /usr
 PPL_PREFIX = /usr
-CAML_DIR = $(shell ocamlc -where)
-CAMLIDL_DIR = $(shell $(OCAMLFIND) query camlidl)
+CAML_PREFIX = `ocamlfind printconf stdlib`
+CAMLIDL_PREFIX = `ocamlfind query camlidl`
 
 ######################################################################
 # Java binaries and directories
