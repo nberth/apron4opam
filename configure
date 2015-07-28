@@ -52,16 +52,6 @@ info "Detected System: ${system}";
 case "${system}" in
     Linux)
 	:;;			# <- defaults are ok.
-    # Darwin) 
-    # 	extra_cflags="-flat_namespace -undefined suppress";
-    # 	echo 'GMP_PREFIX = /usr/local';
-    # 	echo 'MPFR_PREFIX = /usr/local';
-    # 	echo "CFLAGS += ${extra_cflags}";
-    # 	echo "CFLAGS_DEBUG += ${extra_cflags}";
-    # 	echo "CFLAGS_PROF += ${extra_cflags}";
-    # 	maybe_cmd "SED" "gsed" "GNU sed";
-    # 	maybe_cmd "M4" "gm4" "GNU m4";;
-    # FreeBSD)
     Darwin|FreeBSD)
 	echo 'GMP_PREFIX = /usr/local';
 	echo 'MPFR_PREFIX = /usr/local';

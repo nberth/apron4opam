@@ -221,17 +221,23 @@ libt1p%_debug.so: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
 # OCaml binding
 #---------------------------------------
 
-libt1p%_caml.a: t1p_caml.o libt1p%.a
-	$(AR) rcs $@ $<
-	$(RANLIB) $@
-libt1p%_caml_debug.a: t1p_caml_debug.o libt1p%_debug.a
-	$(AR) rcs $@ $<
-	$(RANLIB) $@
+# libt1p%_caml.a: t1p_caml.o libt1p%.a
+# 	$(AR) rcs $@ $<
+# 	$(RANLIB) $@
+# libt1p%_caml_debug.a: t1p_caml_debug.o libt1p%_debug.a
+# 	$(AR) rcs $@ $<
+# 	$(RANLIB) $@
 
-dllt1p%_caml.so: t1p_caml.o libt1p%.so
-	$(CC) $(CFLAGS) -shared -o $@ t1p_caml.o  -L. -lt1p$* $(LIBS) -L../apron
-dllt1p%_caml_debug.so: t1p_caml_debug.o libt1p%_debug.so
-	$(CC) $(CFLAGS) -shared -o $@ t1p_caml_debug.o -L. -lt1p$*_debug $(LIBS_DEBUG) -L../apron
+# dllt1p%_caml.so: t1p_caml.o libt1p%.so
+# 	$(CC) $(CFLAGS) -shared -o $@ t1p_caml.o  -L. -lt1p$* $(LIBS) -L../apron
+# dllt1p%_caml_debug.so: t1p_caml_debug.o libt1p%_debug.so
+# 	$(CC) $(CFLAGS) -shared -o $@ t1p_caml_debug.o -L. -lt1p$*_debug $(LIBS_DEBUG) -L../apron
+
+libt1p%_caml.a dllt1p%_caml.so: t1p_caml.o libt1p%.a
+	$(OCAMLMKLIB) -verbose -o t1p$*_caml t1p_caml.o -L. -lt1p$* -L../apron -lapron $(LIBS)
+
+libt1p%_caml_debug.a dllt1p%_caml_debug.so: t1p_caml_debug.o libt1p%_debug.a
+	$(OCAMLMKLIB) -verbose -o t1p$*_caml_debug t1p_caml_debug.o -L. -lt1p$*_debug -L../apron -lapron_debug $(LIBS_DEBUG)
 
 t1p_caml.o: t1p_caml.c
 	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
