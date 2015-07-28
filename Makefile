@@ -1,6 +1,6 @@
 include Makefile.config
 PKGNAME = apron
-VERSION_STR = 0.9.11-3
+VERSION_STR = 0.9.11-4
 
 LCFLAGS = \
 -Lapron -Litv -Lbox -Loctagons -Lnewpolka -Ltaylor1plus \
@@ -110,7 +110,7 @@ ifneq ($(HAS_PPL),)
 OCAMLFIND_FILES += \
 	$(patsubst %,ppl/%, ppl.idl ppl.mli ppl.cmi ppl.cma ppl.cmx ppl.cmxa ppl.a libap_ppl_caml.a libap_ppl_caml_debug.a dllap_ppl_caml.so) \
 	$(patsubst %,products/%, polkaGrid.idl polkaGrid.mli polkaGrid.cmi polkaGrid.cmx) \
-	$(patsubst %,products/%, $(subst xxx,polkaGrid, $(OCAMLFIND_PROTO)))
+	$(patsubst %,products/%, $(subst xxx,polkaGrid, $(OCAMLFIND_PROTO_ML)))
 endif
 ifneq ($(OCAMLPACK),)
 OCAMLFIND_FILES += mlapronidl/apron_ocamldoc.mli
@@ -166,6 +166,9 @@ install-findlib: mlapronidl/META all
 
 mlapronidl/META: mlapronidl/META.in
 	$(SED) -e "s!@VERSION@!$(VERSION_STR)!g;" $< > $@;
+ifneq ($(HAS_PPL),)
+	cat mlapronidl/META.ppl.in >> $@;
+endif
 
 endif
 endif

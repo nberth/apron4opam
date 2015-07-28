@@ -77,7 +77,7 @@ LIBS_DEBUG = -L$(PPL_PREFIX)/lib -lppl -L$(APRON_PREFIX) -lapron_debug -L$(GMP_P
 #---------------------------------------
 
 all: libap_ppl.a libap_ppl_debug.a ap_ppl_test
-ifneq ($(INSTALL_SHARED),)
+ifneq ($(HAS_SHARED),)
 all: libap_ppl.so libap_ppl_debug.so
 endif
 
@@ -98,15 +98,26 @@ distclean: clean
 install:
 	$(INSTALLd) $(INCDIR) $(LIBDIR) $(BINDIR) $(CAMLDIR)
 	$(INSTALL) ap_ppl.h $(INCDIR)
-	for i in libap_ppl.a libap_ppl_debug.a libap_ppl.so libap_ppl_debug.so; do \
+  ifneq ($(INSTALL_SHARED),)
+	for i in libap_ppl.so libap_ppl_debug.so; do \
 		if test -f $$i; then $(INSTALL) $$i $(LIBDIR); fi; \
 	done
-	for i in libap_ppl_caml*.a dllap_ppl_caml*.so ppl.idl ppl.cmi ppl.cma ppl.cmxa ppl.a; do \
+	for i in dllap_ppl_caml*.so; do \
 		if test -f $$i; then $(INSTALL) $$i $(CAMLDIR); fi; \
 	done
-	for i in ap_ppl_test pplrun ppltop; do \
+	for i in ap_ppl_test; do \
 		if test -f $$i; then $(INSTALL) $$i $(BINDIR); fi; \
 	done
+  endif
+	for i in libap_ppl.a libap_ppl_debug.a; do \
+		if test -f $$i; then $(INSTALL) $$i $(LIBDIR); fi; \
+	done
+	for i in libap_ppl_caml*.a ppl.idl ppl.cmi ppl.cma ppl.cmxa ppl.a; do \
+		if test -f $$i; then $(INSTALL) $$i $(CAMLDIR); fi; \
+	done
+#	for i in pplrun ppltop; do \
+#		if test -f $$i; then $(INSTALL) $$i $(BINDIR); fi; \
+#	done
 
 uninstall:
 	/bin/rm -f $(INCDIR)/ap_ppl*
@@ -138,7 +149,10 @@ libap_ppl.so: $(subst .cc,.o,$(CXXSOURCES))
 libap_ppl_debug.so: $(subst .cc,_debug.o,$(CXXSOURCES))
 	$(CXX) $(CXXFLAGS_DEBUG) -shared -o $@ $^ $(LIBS_DEBUG) -L../apron
 
-ap_ppl_test: libap_ppl_debug.a ppl_test_debug.o
+ifneq ($(HAS_SHARED),)
+ap_ppl_test: libap_ppl_debug.so
+endif
+ap_ppl_test: libap_ppl_debug.a libap_ppl_debug.so ppl_test_debug.o
 	$(CXX) $(CXXFLAGS) -o $@ ppl_test_debug.o \
 	-L. -lap_ppl_debug \
 	-L../newpolka -L$(APRON_PREFIX)/lib -lpolkaMPQ_debug \

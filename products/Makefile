@@ -46,7 +46,7 @@ libpolkaGrid_caml.a libpolkaGrid_caml_debug.a
 ifneq ($(HAS_OCAMLOPT),)
 CCLIB_TO_INSTALL := $(CCLIB_TO_INSTALL) polkaGrid.cmxa polkaGrid.a 
 endif
-ifneq ($(HAS_SHARED),)
+ifneq ($(INSTALL_SHARED),)
 CCLIB_TO_INSTALL += \
 libap_pkgrid.so libap_pkgrid_debug.so dllpolkaGrid_caml.so
 endif

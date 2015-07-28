@@ -12,6 +12,7 @@ remove: [
   ["ocamlfind" "remove" "apron"]
 ]
 depends: ["ocamlfind" "camlidl" "mlgmpidl"]
+depopts: ["conf-ppl"]
 patches: [
   "lincons-basic-readability.patch"
 ]

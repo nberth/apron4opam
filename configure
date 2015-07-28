@@ -21,7 +21,7 @@ EOF
 
 # utils
 
-warn () { echo "$1" >/dev/stderr; }
+warn () { echo "Warning: $1" >/dev/stderr; }
 info () { echo "$1" >/dev/stderr; }
 err () { echo "$1" >/dev/stderr; exit 1; }
 arr () { echo "Missing argument for \`$1'!" >/dev/stderr; usage; exit 1; }
@@ -46,6 +46,13 @@ echo "APRON_PREFIX = ${prefix}";
 
 test_cmd () { command -v $1 >/dev/null; }
 maybe_cmd () { test_cmd $2 && echo "$1 = $2" || warn "$3 seems unavailable"; }
+test_clib () {
+    ( cd /tmp; c="$(mktemp --suffix=.c)"; cat - > "$c";
+      # Really assume cc?
+      cc "$c" "$@" -o /dev/null \
+	  && { rm "$c"; return 0; } \
+	  || { rm "$c"; return 1; }; )
+}
 
 system=$(uname -s);
 info "Detected System: ${system}"; 
@@ -60,5 +67,21 @@ case "${system}" in
     *)
 	err "Unknown System!";;
 esac;
+
+ocamlfind query gmp 2>&1 >/dev/null || err "Missing mlgmpidl!";
+
+test_ppl () {
+    test_clib -lppl_c -lppl <<EOF
+#include <ppl_c.h>
+#ifndef PPL_VERSION_MAJOR
+# error "No PPL header"
+#endif
+int main() { ppl_initialize(); return ppl_finalize(); }
+EOF
+}
+
+test_ppl \
+    && { info "PPL library found."; echo 'HAS_PPL = 1'; } \
+    || { info "PPL library not found."; }
 
 # ------------------------------------------------------------------------------
