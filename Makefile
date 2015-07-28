@@ -76,10 +76,11 @@ ifneq ($(INSTALL_SHARED),)
   OCAMLFIND_PROTO_BASE += libxxx.so libxxx_debug.so
 endif
 
-OCAMLFIND_PROTO_ML = xxx.cma xxx.cmxa xxx.a libxxx_caml.a libxxx_caml_debug.a
+OCAMLFIND_PROTO_ML0 = libxxx_caml.a libxxx_caml_debug.a
 ifneq ($(HAS_SHARED),)
-  OCAMLFIND_PROTO_ML += dllxxx_caml.so
+  OCAMLFIND_PROTO_ML0 += dllxxx_caml.so dllxxx_caml_debug.so
 endif
+OCAMLFIND_PROTO_ML = xxx.cma xxx.cmxa xxx.a $(OCAMLFIND_PROTO_ML0)
 
 OCAMLFIND_PROTO = $(OCAMLFIND_PROTO_BASE) $(OCAMLFIND_PROTO_ML)
 OCAMLFIND_FILES = \
@@ -108,9 +109,12 @@ OCAMLFIND_FILES = \
 
 ifneq ($(HAS_PPL),)
 OCAMLFIND_FILES += \
-	$(patsubst %,ppl/%, ppl.idl ppl.mli ppl.cmi ppl.cma ppl.cmx ppl.cmxa ppl.a libap_ppl_caml.a libap_ppl_caml_debug.a dllap_ppl_caml.so) \
+	$(patsubst %,ppl/%, ppl.idl ppl.mli ppl.cmi ppl.cma ppl.cmx ppl.cmxa ppl.a) \
+	$(patsubst %,ppl/%, $(subst xxx,ap_ppl, $(OCAMLFIND_PROTO_ML0))) \
+	$(patsubst %,ppl/%, $(subst xxx,ap_ppl, $(OCAMLFIND_PROTO_BASE))) \
 	$(patsubst %,products/%, polkaGrid.idl polkaGrid.mli polkaGrid.cmi polkaGrid.cmx) \
-	$(patsubst %,products/%, $(subst xxx,polkaGrid, $(OCAMLFIND_PROTO_ML)))
+	$(patsubst %,products/%, $(subst xxx,polkaGrid, $(OCAMLFIND_PROTO_ML))) \
+	$(patsubst %,products/%, $(subst xxx,ap_pkgrid, $(OCAMLFIND_PROTO_BASE)))
 endif
 ifneq ($(OCAMLPACK),)
 OCAMLFIND_FILES += mlapronidl/apron_ocamldoc.mli

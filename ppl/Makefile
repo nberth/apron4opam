@@ -69,8 +69,8 @@ CXXSOURCES = ppl_user.cc ppl_poly.cc ppl_grid.cc
 CSOURCES = ppl_test.c
 CCINC = ppl_user.hh ppl_poly.hh ppl_grid.hh ppl_grid.h ap_ppl.h
 
-LIBS = -L$(PPL_PREFIX)/lib -lppl -L$(APRON_PREFIX) -lapron -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
-LIBS_DEBUG = -L$(PPL_PREFIX)/lib -lppl -L$(APRON_PREFIX) -lapron_debug -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
+LIBS = -L$(PPL_PREFIX)/lib -lppl -L../apron -lapron -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
+LIBS_DEBUG = -L$(PPL_PREFIX)/lib -lppl -L../apron -lapron_debug -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
 
 #---------------------------------------
 # Rules
@@ -196,14 +196,12 @@ endif
 #	bigarray.cma gmp.cma apron.cma ppl.cma \
 #	-ccopt "-L.  -L../apron -L../itv -L$(MLGMPIDL_PREFIX)/lib -L../mlapronidl"
 
-libap_ppl_caml.a: ap_ppl_caml.o
-	$(AR) rcs $@ $^
-	$(RANLIB) $@
-libap_ppl_caml_debug.a: ap_ppl_caml_debug.o
-	$(AR) rcs $@ $^
-	$(RANLIB) $@
-dllap_ppl_caml.so: ap_ppl_caml.o libap_ppl.so
-	$(CXX) $(CXXFLAGS) -shared -o $@ $<  -L. -lap_ppl $(LIBS) -L../apron
+
+libap_ppl_caml.a dllap_ppl_caml.so: ap_ppl_caml.o libap_ppl.a
+	$(OCAMLMKLIB) -verbose -o ap_ppl_caml ap_ppl_caml.o $(LIBS) -L. -lap_ppl -lapron
+
+libap_ppl_caml_debug.a dllap_ppl_caml_debug.so: ap_ppl_caml_debug.o libap_ppl_debug.a
+	$(OCAMLMKLIB) -verbose -o ap_ppl_caml_debug ap_ppl_caml_debug.o $(LIBS_DEBUG) -L. -lap_ppl_debug -lapron
 
 ppl.cma: ppl.cmo libap_ppl_caml.a
 	$(OCAMLMKLIB) -ocamlc "$(OCAMLC) -cc $(CXX)" -verbose -o ppl -oc ap_ppl_caml ppl.cmo -L. -lap_ppl $(LIBS) -L../apron
