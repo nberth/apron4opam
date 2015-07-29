@@ -188,7 +188,12 @@ liboct%.so: $(subst .c,%.o,$(CCSOURCES))
 liboct%_debug.so: $(subst .c,%_debug.o,$(CCSOURCES))
 	$(CC) $(CFLAGS) -shared -o $@ $^ $(LIBS_DEBUG) -L../apron
 
-octtest%: liboct%_debug.a oct_test%.o
+ifeq ($(HAS_SHARED),)
+octtest%: liboct%_debug.so
+else
+octtest%: liboct%_debug.a
+endif
+octtest%: oct_test%.o
 	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -o $@ oct_test$*.o \
 	-L. -loct$*_debug \
 	-L../newpolka -lpolkaMPQ_debug \
@@ -293,17 +298,19 @@ endif
 #octrun%: oct.cma liboct_caml.a
 #	$(OCAMLC) -noautolink $(OCAMLFLAGS) $(OCAMLINC) -o $@ -make-runtime bigarray.cma gmp.cma apron.cma oct.cma -ccopt "-L. -L$(MLGMPIDL_PREFIX)/lib -L../mlapronidl -L../apron -L../itv -L$(MPFR_PREFIX)/lib -L$(GMP_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml" -cclib "-loct_caml -loct$* -lapron_caml -lapron -lgmp_caml -lmpfr -lgmp -lbigarray -lcamlidl"
 
-oct%.cma: oct.cmi oct.cmo liboct%_caml.a liboct%.a
-	$(OCAMLMKLIB) -ocamlc "$(OCAMLC)" -verbose -o oct$* -oc oct$*_caml oct.cmo -L. -loct$* $(LIBS) -L../apron
+OCAMLMKLIB := $(OCAMLMKLIB) -verbose
 
-oct%.cmxa oct%.a: oct.cmi oct.cmx liboct%_caml.a liboct%.a
-	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o oct$* -oc oct$*_caml oct.cmx -L. -loct$* $(LIBS) -L../apron
+oct%.cma: oct.cmo liboct%_caml.a liboct%.a
+	$(OCAMLMKLIB) -o oct$* -oc oct$*_caml oct.cmo -L. -loct$* $(LIBS)
+
+oct%.cmxa oct%.a: oct.cmx liboct%_caml.a liboct%.a
+	$(OCAMLMKLIB) -o oct$* -oc oct$*_caml oct.cmx -L. -loct$* $(LIBS)
 
 liboct%_caml.a dlloct%_caml.so: oct_caml.o liboct%.a
-	$(OCAMLMKLIB) -verbose -o oct$*_caml oct_caml.o $(LIBS) -L. -loct$* -lapron
+	$(OCAMLMKLIB) -o oct$*_caml $+ $(LIBS)
 
 liboct%_caml_debug.a dlloct%_caml_debug.so: oct_caml_debug.o liboct%_debug.a
-	$(OCAMLMKLIB) -verbose -o oct$*_caml_debug oct_caml_debug.o $(LIBS_DEBUG) -L. -loct$*_debug -lapron_debug
+	$(OCAMLMKLIB) -o oct$*_caml_debug $+ $(LIBS_DEBUG)
 
 rebuild: oct.idl
 	mkdir -p tmp

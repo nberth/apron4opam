@@ -52,6 +52,7 @@ endif
 ifneq ($(INSTALL_SHARED),)
 CAML_TO_INSTALL += libap_pkgrid.so libap_pkgrid_debug.so dllpolkaGrid_caml.so
 endif
+endif
 
 LIBS = -L../ppl -lap_ppl -L$(PPL_PREFIX)/lib -lppl -L../apron -lapron -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
 LIBS_DEBUG = -L../ppl -lap_ppl_debug -L$(PPL_PREFIX)/lib -lppl -L../apron -lapron_debug -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
@@ -134,21 +135,23 @@ libap_pkgrid_debug.so: ap_pkgrid_debug.o
 # C rules
 #---------------------------------------
 
+OCAMLMKLIB := $(OCAMLMKLIB) -ocamlc "$(OCAMLC) -cc $(CXX)" -ocamlopt "$(OCAMLOPT) -cc $(CXX)" -verbose
+
 libpolkaGrid_caml.a dllpolkaGrid_caml.so: polkaGrid_caml.o libap_pkgrid.a
-	$(OCAMLMKLIB) -verbose -o polkaGrid_caml polkaGrid_caml.o $(LIBS) -L. -lap_pkgrid
+	$(OCAMLMKLIB) -o polkaGrid_caml $+ $(LIBS)
 
 libpolkaGrid_caml_debug.a dllpolkaGrid_caml_debug.so: polkaGrid_caml_debug.o libap_pkgrid_debug.a
-	$(OCAMLMKLIB) -verbose -o polkaGrid_caml_debug polkaGrid_caml_debug.o $(LIBS_DEBUG) -L. -lap_pkgrid_debug
+	$(OCAMLMKLIB) -o polkaGrid_caml_debug $+ $(LIBS_DEBUG)
 
 #---------------------------------------
 # ML rules
 #---------------------------------------
 
 polkaGrid.cma: polkaGrid.cmo libpolkaGrid_caml.a libap_pkgrid.a
-	$(OCAMLMKLIB) -ocamlc "$(OCAMLC) -cc $(CXX)" -verbose -o polkaGrid -oc polkaGrid_caml polkaGrid.cmo -L$(APRON_PREFIX)/lib -lap_pkgrid $(LIBS) 
+	$(OCAMLMKLIB) -o polkaGrid -oc polkaGrid_caml polkaGrid.cmo -L. -lap_pkgrid $(LIBS) 
 
 polkaGrid.cmxa polkaGrid.a: polkaGrid.cmx libpolkaGrid_caml.a libap_pkgrid.a
-	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT) -cc $(CXX)" -verbose -o polkaGrid -oc polkaGrid_caml polkaGrid.cmx -L$(APRON_PREFIX)/lib -lap_pkgrid $(LIBS)
+	$(OCAMLMKLIB) -o polkaGrid -oc polkaGrid_caml polkaGrid.cmx -L. -lap_pkgrid $(LIBS)
 
 #---------------------------------------
 # IDL rules

@@ -224,24 +224,26 @@ test.cmo: test.ml
 # OCaml binding
 #---------------------------------------
 
+OCAMLMKLIB := $(OCAMLMKLIB) -verbose
+
 libpolka%_caml.a dllpolka%_caml.so: polka_caml.o libpolka%.a
-	$(OCAMLMKLIB) -verbose -o polka$*_caml polka_caml.o $(LIBS) -L. -lpolka$* -lapron
+	$(OCAMLMKLIB) -o polka$*_caml $+ $(LIBS)
 
 libpolka%_caml_debug.a dllpolka%_caml_debug.so: polka_caml_debug.o libpolka%_debug.a
-	$(OCAMLMKLIB) -verbose -o polka$*_caml_debug polka_caml_debug.o $(LIBS_DEBUG) -L. -lpolka$*_debug -lapron_debug
+	$(OCAMLMKLIB) -o polka$*_caml_debug $+ $(LIBS_DEBUG)
 
 #---------------------------------------
 # OCaml rules
 #---------------------------------------
 
 polka%.cma: polka.cmo libpolka%_caml.a libpolka%.a
-	$(OCAMLMKLIB) -ocamlc "$(OCAMLC)" -verbose -o polka$* -oc polka$*_caml polka.cmo -L. -lpolka$* $(LIBS)
+	$(OCAMLMKLIB) -o polka$* -oc polka$*_caml polka.cmo -L. -lpolka$* $(LIBS)
 
 polka%.cmxa polka%.a: polka.cmx libpolka%_caml.a libpolka%.a
-	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o polka$* -oc polka$*_caml polka.cmx -L. -lpolka$* $(LIBS)
+	$(OCAMLMKLIB) -o polka$* -oc polka$*_caml polka.cmx -L. -lpolka$* $(LIBS)
 
 polka%.d.cmxa polka%.d.a: polka.cmx libpolka%_caml_debug.a libpolka%_debug.a
-	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o polka$*.d -oc polka$*_caml_debug polka.cmx -L. -lpolka$*_debug $(LIBS_DEBUG)
+	$(OCAMLMKLIB) -o polka$*.d -oc polka$*_caml_debug polka.cmx -L. -lpolka$*_debug $(LIBS_DEBUG)
 
 #---------------------------------------
 # IDL rules

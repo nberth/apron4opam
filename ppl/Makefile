@@ -194,18 +194,19 @@ endif
 #	bigarray.cma gmp.cma apron.cma ppl.cma \
 #	-ccopt "-L.  -L../apron -L../itv -L$(MLGMPIDL_PREFIX)/lib -L../mlapronidl"
 
+OCAMLMKLIB := $(OCAMLMKLIB) -ocamlc "$(OCAMLC) -cc $(CXX)" -ocamlopt "$(OCAMLOPT) -cc $(CXX)" -verbose
 
 libap_ppl_caml.a dllap_ppl_caml.so: ap_ppl_caml.o libap_ppl.a
-	$(OCAMLMKLIB) -verbose -o ap_ppl_caml ap_ppl_caml.o $(LIBS) -L. -lap_ppl -lapron
+	$(OCAMLMKLIB) -o ap_ppl_caml $+ $(LIBS)
 
 libap_ppl_caml_debug.a dllap_ppl_caml_debug.so: ap_ppl_caml_debug.o libap_ppl_debug.a
-	$(OCAMLMKLIB) -verbose -o ap_ppl_caml_debug ap_ppl_caml_debug.o $(LIBS_DEBUG) -L. -lap_ppl_debug -lapron
+	$(OCAMLMKLIB) -o ap_ppl_caml_debug $+ $(LIBS_DEBUG)
 
-ppl.cma: ppl.cmo libap_ppl_caml.a
-	$(OCAMLMKLIB) -ocamlc "$(OCAMLC) -cc $(CXX)" -verbose -o ppl -oc ap_ppl_caml ppl.cmo -L. -lap_ppl $(LIBS) -L../apron
+ppl.cma: ppl.cmo libap_ppl_caml.a libap_ppl.a
+	$(OCAMLMKLIB) -o ppl -oc ap_ppl_caml ppl.cmo -L. -lap_ppl $(LIBS)
 
-ppl.cmxa ppl.a: ppl.cmx libap_ppl_caml.a
-	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT) -cc $(CXX)" -verbose -o ppl -oc ap_ppl_caml ppl.cmx -L. -lap_ppl $(LIBS) -L..:apron
+ppl.cmxa ppl.a: ppl.cmx libap_ppl_caml.a libap_ppl.a
+	$(OCAMLMKLIB) -o ppl -oc ap_ppl_caml ppl.cmx -L. -lap_ppl $(LIBS)
 
 manager.idl: ../mlapronidl/manager.idl
 	ln -s $< $@

@@ -208,11 +208,13 @@ libbox%_debug.so: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
 # 	$(AR) rcs $@ $<
 # 	$(RANLIB) $@
 
+OCAMLMKLIB := $(OCAMLMKLIB) -verbose
+
 libbox%_caml.a dllbox%_caml.so: box_caml.o libbox%.a
-	$(OCAMLMKLIB) -verbose -o box$*_caml box_caml.o $(LIBS) -L. -lbox$* -lapron
+	$(OCAMLMKLIB) -o box$*_caml $+ $(LIBS)
 
 libbox%_caml_debug.a dllbox%_caml_debug.so: box_caml_debug.o libbox%_debug.a
-	$(OCAMLMKLIB) -verbose -o box$*_caml_debug box_caml_debug.o $(LIBS_DEBUG) -L. -lbox$*_debug -lapron_debug
+	$(OCAMLMKLIB) -o box$*_caml_debug $+ $(LIBS_DEBUG)
 
 box_caml.o: box_caml.c
 	$(CC) $(CFLAGS) $(ICFLAGS) -I../apron -DNUM_MPQ -c -o $@ $<
@@ -224,10 +226,10 @@ box_caml_debug.o: box_caml.c
 #---------------------------------------
 
 box%.cma: box.cmo libbox%_caml.a libbox%.a
-	$(OCAMLMKLIB) -ocamlc "$(OCAMLC)" -verbose -o box$* -oc box$*_caml box.cmo -L. -lbox$* $(LIBS) -L../apron
+	$(OCAMLMKLIB) -o box$* -oc box$*_caml box.cmo -L. -lbox$* $(LIBS)
 
 box%.cmxa box%.a: box.cmx libbox%_caml.a libbox%.a
-	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o box$* -oc box$*_caml box.cmx -L$(APRON_PREFIX)/lib -L. -lbox$* $(LIBS) -L../apron
+	$(OCAMLMKLIB) -o box$* -oc box$*_caml box.cmx -L. -lbox$* $(LIBS)
 
 #---------------------------------------
 # IDL rules
