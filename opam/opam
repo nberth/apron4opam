@@ -4,12 +4,13 @@ authors: ["Bertrant Jeannet" "Antoine Miné"]
 homepage: "http://apron.cri.ensmp.fr/library/"
 license: "LGPL-2.1"
 build: [
-  ["sh" "./configure" "--prefix" share]
-  [make "rebuild"]
-  [make "install-findlib"]
+  ["sh" "./configure" "--prefix" "%{apron:share}%"] {conf-ppl:installed}
+  ["sh" "./configure" "--prefix" "%{apron:share}%" "-no-ppl"] {! conf-ppl:installed}
+  [make "install"]
 ]
 remove: [
   ["ocamlfind" "remove" "apron"]
+  ["rm" "-r" "-f" "%{apron:share}%"]
 ]
 depends: ["ocamlfind" "camlidl" "mlgmpidl"]
 depopts: ["conf-ppl"]
