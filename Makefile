@@ -1,6 +1,6 @@
 include Makefile.config
 PKGNAME = apron
-VERSION_STR = 0.9.11-4
+VERSION_STR = 20150729
 
 include vars.mk
 
@@ -234,29 +234,3 @@ pkg_%:
 	(cd $*; $(MAKE) dist)
 	(cd $(PKG); tar xzf ../$*.tgz)
 	rm -rf $*.tgz
-
-#-----------------------------------
-# OPAM Packaging
-#-----------------------------------
-
-ifneq ($(OPAM_DEVEL_DIR),)
-
-  OPAM_DIR = opam
-  OPAM_FILES = descr opam files
-
-  # XXX: force full cleanup when building opam distribution archive,
-  # to avoid having to select all files manually.
-  DIST_DEPS = distclean
-  DIST_FILES = apron apronxx AUTHORS box Changes COPYING examples	\
-    index.tex itv japron Makefile Makefile.config.* mlapronidl		\
-    newpolka num octagons ppl products README* taylor1plus test		\
-    ocamlpack configure vars.mk
-
-  -include $(OPAM_DEVEL_DIR)/opam-dist.mk
-
-endif
-
-# ---
-
-.PHONY: force
-force:
