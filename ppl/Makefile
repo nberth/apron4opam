@@ -196,7 +196,7 @@ ppl.cmxa ppl.a: ppl.cmx libap_ppl_caml.a libap_ppl.a
 manager.idl: ../mlapronidl/manager.idl
 	ln -s $< $@
 
-ppl.ml ppl.mli ppl_caml.c: ppl.idl perlscript_caml.pl ../mlapronidl/manager.idl
+ppl.ml ppl.mli ap_ppl_caml.c: ppl.idl perlscript_caml.pl ../mlapronidl/manager.idl
 	mkdir -p tmp
 	cp ppl.idl ../mlapronidl/manager.idl tmp/
 	cd tmp && $(CAMLIDL) -no-include -nocpp ppl.idl
