@@ -1,16 +1,7 @@
 include ../Makefile.config
-
-PREFIX = $(APRON_PREFIX)
+include ../vars.mk
 
 SRCDIR = $(shell pwd)
-
-ifneq ($(OCAMLFIND),)
-MLGMPIDL_INCLUDE = $(shell $(OCAMLFIND) query gmp)
-MLGMPIDL_LIB = $(MLGMPIDL_INCLUDE)
-else
-MLGMPIDL_INCLUDE = $(MLGMPIDL_PREFIX)/include
-MLGMPIDL_LIB = $(MLGMPIDL_PREFIX)/lib
-endif
 
 #---------------------------------------
 # Programs
@@ -45,7 +36,7 @@ CCBIN_TO_INSTALL =
 CCLIB_TO_INSTALL = \
 libboxMPQ.a libboxD.a libboxMPFR.a \
 libboxMPQ_debug.a libboxD_debug.a libboxMPFR_debug.a
-ifneq ($(INSTALL_SHARED),)
+ifneq ($(HAS_SHARED),)
 CCLIB_TO_INSTALL := $(CCLIB_TO_INSTALL) \
 libboxMPQ.so libboxD.so libboxMPFR.so \
 libboxMPQ_debug.so libboxD_debug.so libboxMPFR_debug.so
@@ -70,8 +61,8 @@ CAML_TO_INSTALL += dllboxMPQ_caml.so dllboxD_caml.so dllboxMPFR_caml.so
 endif
 endif
 
-LIBS = -L../apron -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
-LIBS_DEBUG = -L../apron -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
+LIBS = -L../apron -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
+LIBS_DEBUG = -L../apron -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
 
 #---------------------------------------
 # Rules
@@ -86,7 +77,7 @@ all: allMPQ allD allMPFR
 allMPQ: libboxMPQ.a libboxMPQ_debug.a
 allD: libboxD.a libboxD_debug.a
 allMPFR: libboxMPFR.a libboxMPFR_debug.a
-ifneq ($(INSTALL_SHARED),)
+ifneq ($(HAS_SHARED),)
 allMPQ: libboxMPQ.so libboxMPQ_debug.so
 allD: libboxD.so libboxD_debug.so
 allMPFR: libboxMPFR.so libboxMPFR_debug.so
@@ -169,9 +160,9 @@ libbox%_debug.a: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
 libbox%.so:  $(subst .c,%.o,$(CCMODULES:%=%.c))
-	$(CC) $(CFLAGS) -shared -o $@ $^ $(LIBS) -L../apron
+	$(CC) $(CFLAGS) -shared -o $@ $^ $(LIBS)
 libbox%_debug.so: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
-	$(CC) $(CFLAGS_DEBUG) -shared -o $@ $^ $(LIBS_DEBUG) -L../apron
+	$(CC) $(CFLAGS_DEBUG) -shared -o $@ $^ $(LIBS_DEBUG)
 
 %MPQ.o: %.c
 	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
@@ -201,18 +192,16 @@ libbox%_debug.so: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
 # 	$(AR) rcs $@ $<
 # 	$(RANLIB) $@
 
-OCAMLMKLIB := $(OCAMLMKLIB) -verbose
-
 libbox%_caml.a dllbox%_caml.so: box_caml.o libbox%.a
-	$(OCAMLMKLIB) -o box$*_caml $+ $(LIBS)
+	$(OCAMLMKLIB) -o box$*_caml $< -L. -lbox$* $(LIBS)
 
 libbox%_caml_debug.a dllbox%_caml_debug.so: box_caml_debug.o libbox%_debug.a
-	$(OCAMLMKLIB) -o box$*_caml_debug $+ $(LIBS_DEBUG)
+	$(OCAMLMKLIB) -o box$*_caml_debug $< -L. -lbox$*_debug $(LIBS_DEBUG)
 
 box_caml.o: box_caml.c
-	$(CC) $(CFLAGS) $(ICFLAGS) -I../apron -DNUM_MPQ -c -o $@ $<
+	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
 box_caml_debug.o: box_caml.c
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -I../apron -DNUM_MPQ -c -o $@ $<
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
 
 #---------------------------------------
 # OCaml rules

@@ -2,6 +2,8 @@ include Makefile.config
 PKGNAME = apron
 VERSION_STR = 0.9.11-4
 
+include vars.mk
+
 LCFLAGS = \
 -Lapron -Litv -Lbox -Loctagons -Lnewpolka -Ltaylor1plus \
 -L$(PPL_PREFIX)/lib -Lppl \
@@ -50,14 +52,12 @@ ifneq ($(HAS_PPL),)
 	(cd products; make ml)
 endif
 
-.PHONY: aprontop apronppltop
-
 aprontop:
-	$(OCAMLMKTOP) -I $(MLGMPIDL_PREFIX)/lib -I $(APRON_PREFIX)/lib -verbose -o $@ \
+	$(OCAMLMKTOP) -I $(MLGMPIDL_LIB) -I $(APRON_PREFIX)/lib -verbose -o $@ \
 	bigarray.cma gmp.cma apron.cma boxMPQ.cma octMPQ.cma polkaMPQ.cma t1pMPQ.cma
 
 apronppltop:
-	$(OCAMLMKTOP) -I $(MLGMPIDL_PREFIX)/lib -I $(APRON_PREFIX)/lib -verbose -o $@ \
+	$(OCAMLMKTOP) -I $(MLGMPIDL_LIB) -I $(APRON_PREFIX)/lib -verbose -o $@ \
 	bigarray.cma gmp.cma apron.cma boxMPQ.cma octMPQ.cma polkaMPQ.cma ppl.cma polkaGrid.cma t1pMPQ.cmxa
 
 rebuild:
@@ -112,14 +112,14 @@ OCAMLFIND_FILES += \
 endif
 endif
 
-install: mlapronidl/META
-	(cd num; make install)
-	(cd itv; make install)
-	(cd apron; make install)
-	(cd newpolka; make install)
-	(cd box; make install)
-	(cd octagons; make install)
-	(cd taylor1plus; make install)
+install: all
+	(cd num; $(MAKE) install)
+	(cd itv; $(MAKE) install)
+	(cd apron; $(MAKE) install)
+	(cd newpolka; $(MAKE) install)
+	(cd box; $(MAKE) install)
+	(cd octagons; $(MAKE) install)
+	(cd taylor1plus; $(MAKE) install)
 ifneq ($(HAS_PPL),)
 	(cd ppl; make install)
 	(cd products; make install)
@@ -250,7 +250,7 @@ ifneq ($(OPAM_DEVEL_DIR),)
   DIST_FILES = apron apronxx AUTHORS box Changes COPYING examples	\
     index.tex itv japron Makefile Makefile.config.* mlapronidl		\
     newpolka num octagons ppl products README* taylor1plus test		\
-    ocamlpack configure
+    ocamlpack configure vars.mk
 
   -include $(OPAM_DEVEL_DIR)/opam-dist.mk
 

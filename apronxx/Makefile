@@ -6,22 +6,13 @@
 
 
 include ../Makefile.config
+include ../vars.mk
 
 #---------------------------------------
 # Directories
 #---------------------------------------
 
 SRCDIR = $(shell pwd)
-#
-PREFIX = $(APRON_PREFIX)
-#
-# C include and lib directories
-INCDIR = $(PREFIX)/include
-LIBDIR = $(PREFIX)/lib
-BINDIR = $(PREFIX)/bin
-#
-SRCDIR = $(shell pwd)
-
 
 #---------------------------------------
 # Flags

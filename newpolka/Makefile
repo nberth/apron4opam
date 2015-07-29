@@ -1,16 +1,7 @@
 include ../Makefile.config
-
-PREFIX = $(APRON_PREFIX)
+include ../vars.mk
 
 SRCDIR = $(shell pwd)
-
-ifneq ($(OCAMLFIND),)
-MLGMPIDL_INCLUDE = $(shell $(OCAMLFIND) query gmp)
-MLGMPIDL_LIB = $(MLGMPIDL_INCLUDE)
-else
-MLGMPIDL_INCLUDE = $(MLGMPIDL_PREFIX)/include
-MLGMPIDL_LIB = $(MLGMPIDL_PREFIX)/lib
-endif
 
 #---------------------------------------
 # Programs
@@ -97,7 +88,7 @@ all: allMPQ allRll
 
 allMPQ: libpolkaMPQ.a libpolkaMPQ_debug.a
 allRll: libpolkaRll.a libpolkaRll_debug.a
-ifneq ($(INSTALL_SHARED),)
+ifneq ($(HAS_SHARED),)
 allMPQ: libpolkaMPQ.so libpolkaMPQ_debug.so
 allRll: libpolkaRll.so libpolkaRll_debug.so
 endif
@@ -203,9 +194,9 @@ libpolka%_debug.so: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
 %Rll_debug.o: %.c $(CCINC)
 	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_LONGLONGRAT -c -o $@ $<
 %MPQ.o: %.c $(CCINC)
-	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -I$(GMP_PREFIX)/include -c -o $@ $<
+	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
 %MPQ_debug.o: %.c $(CCINC)
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPQ -I$(GMP_PREFIX)/include -c -o $@ $<
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
 
 #-----------------------------------
 # Caml part
@@ -225,10 +216,10 @@ test.cmo: test.ml
 OCAMLMKLIB := $(OCAMLMKLIB) -verbose
 
 libpolka%_caml.a dllpolka%_caml.so: polka_caml.o libpolka%.a
-	$(OCAMLMKLIB) -o polka$*_caml $+ $(LIBS)
+	$(OCAMLMKLIB) -o polka$*_caml $< -L. -lpolka$* $(LIBS)
 
 libpolka%_caml_debug.a dllpolka%_caml_debug.so: polka_caml_debug.o libpolka%_debug.a
-	$(OCAMLMKLIB) -o polka$*_caml_debug $+ $(LIBS_DEBUG)
+	$(OCAMLMKLIB) -o polka$*_caml_debug $< -L. -lpolka$*_debug $(LIBS_DEBUG)
 
 #---------------------------------------
 # OCaml rules

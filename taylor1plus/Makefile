@@ -1,21 +1,11 @@
-
 include ../Makefile.config
+include ../vars.mk
+
+SRCDIR = $(shell pwd)
 
 ifneq ($(CSDP_PATH),)
 CSDP_CFLAGS = -ansi -Wall -DNOSHORTS -DUSEGETTIME -I$(CSDP_PATH)/include -D_USE_SDP
 CSDP_LIBS = -L/usr/lib/sse2 -L$(CSDP_PATH)/lib -lsdp -llapack -lf77blas -lcblas -latlas -lgfortran -lm
-endif
-
-PREFIX = $(APRON_PREFIX)
-
-SRCDIR = $(shell pwd)
-
-ifneq ($(OCAMLFIND),)
-MLGMPIDL_INCLUDE = $(shell $(OCAMLFIND) query gmp)
-MLGMPIDL_LIB = $(MLGMPIDL_INCLUDE)
-else
-MLGMPIDL_INCLUDE = $(MLGMPIDL_PREFIX)/include
-MLGMPIDL_LIB = $(MLGMPIDL_PREFIX)/lib
 endif
 
 #---------------------------------------
@@ -54,7 +44,7 @@ CCBIN_TO_INSTALL =
 CCLIB_TO_INSTALL = \
 libt1pMPQ.a libt1pD.a libt1pMPFR.a \
 libt1pMPQ_debug.a libt1pD_debug.a libt1pMPFR_debug.a
-ifneq ($(INSTALL_SHARED),)
+ifneq ($(HAS_SHARED),)
 CCLIB_TO_INSTALL := $(CCLIB_TO_INSTALL) \
 libt1pMPQ.so libt1pD.so libt1pMPFR.so \
 libt1pMPQ_debug.so libt1pD_debug.so libt1pMPFR_debug.so
@@ -79,8 +69,8 @@ CAML_TO_INSTALL += dllt1pMPQ_caml.so dllt1pD_caml.so dllt1pMPFR_caml.so dllt1pMP
 endif
 endif
 
-LIBS = -L$(APRON_PREFIX) -lapron -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
-LIBS_DEBUG = -L$(APRON_PREFIX) -lapron_debug -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
+LIBS = -L../apron -lapron -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
+LIBS_DEBUG = -L../apron -lapron_debug -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
 
 #---------------------------------------
 # Rules
@@ -97,7 +87,7 @@ all: allMPQ allD allMPFR
 allMPQ: libt1pMPQ.a libt1pMPQ_debug.a
 allD: libt1pD.a libt1pD_debug.a
 allMPFR: libt1pMPFR.a libt1pMPFR_debug.a
-ifneq ($(INSTALL_SHARED),)
+ifneq ($(HAS_SHARED),)
 allMPQ: libt1pMPQ.so libt1pMPQ_debug.so
 allD: libt1pD.so libt1pD_debug.so
 allMPFR: libt1pMPFR.so libt1pMPFR_debug.so
@@ -197,9 +187,9 @@ libt1p%_debug.a: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
 libt1p%.so:  $(subst .c,%.o,$(CCMODULES:%=%.c))
-	$(CC) $(CFLAGS) -shared -o $@ $^ $(LIBS) -lbox$* -lpolkaMPQ -L../apron -L../box -L../newpolka
+	$(CC) $(CFLAGS) -shared -o $@ $^ $(LIBS) -lbox$* -lpolkaMPQ -L../box -L../newpolka
 libt1p%_debug.so: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
-	$(CC) $(CFLAGS_DEBUG) -shared -o $@ $^ $(LIBS_DEBUG) -lbox$*_debug -lpolkaMPQ_debug -L../apron -L../box -L../newpolka
+	$(CC) $(CFLAGS_DEBUG) -shared -o $@ $^ $(LIBS_DEBUG) -lbox$*_debug -lpolkaMPQ_debug -L../box -L../newpolka
 
 %MPQ.o: %.c
 	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
@@ -235,10 +225,10 @@ libt1p%_debug.so: $(subst .c,%_debug.o,$(CCMODULES:%=%.c))
 # 	$(CC) $(CFLAGS) -shared -o $@ t1p_caml_debug.o -L. -lt1p$*_debug $(LIBS_DEBUG) -L../apron
 
 libt1p%_caml.a dllt1p%_caml.so: t1p_caml.o libt1p%.a
-	$(OCAMLMKLIB) -verbose -o t1p$*_caml t1p_caml.o -L. -lt1p$* -L../apron -lapron $(LIBS)
+	$(OCAMLMKLIB) -verbose -o t1p$*_caml t1p_caml.o -L. -lt1p$* $(LIBS)
 
 libt1p%_caml_debug.a dllt1p%_caml_debug.so: t1p_caml_debug.o libt1p%_debug.a
-	$(OCAMLMKLIB) -verbose -o t1p$*_caml_debug t1p_caml_debug.o -L. -lt1p$*_debug -L../apron -lapron_debug $(LIBS_DEBUG)
+	$(OCAMLMKLIB) -verbose -o t1p$*_caml_debug t1p_caml_debug.o -L. -lt1p$*_debug $(LIBS_DEBUG)
 
 t1p_caml.o: t1p_caml.c
 	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
@@ -261,7 +251,7 @@ t1p%.cma: t1p.cmo libt1p%_caml.a libt1p%.a
 	$(OCAMLMKLIB) -ocamlc "$(OCAMLC)" -verbose -o t1p$* -oc t1p$*_caml t1p.cmo -L. -lt1p$* $(LIBS) 
 
 t1p%.cmxa t1p%.a: t1p.cmx libt1p%_caml.a libt1p%.a
-	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o t1p$* -oc t1p$*_caml t1p.cmx -L$(APRON_PREFIX)/lib -L. -lt1p$* $(LIBS) 
+	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o t1p$* -oc t1p$*_caml t1p.cmx -L. -lt1p$* $(LIBS) 
 
 #---------------------------------------
 # IDL rules

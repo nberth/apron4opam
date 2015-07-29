@@ -48,7 +48,7 @@ JNIINC    = -I/java/include
 CFLAGS = \
 -Wcast-qual -Wswitch -Werror-implicit-function-declaration \
 -Wall -Wextra -Wundef -Wbad-function-cast -Wcast-align -Wstrict-prototypes \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -std=c99 -U__STRICT_ANSI__ \
 -fPIC -O3 -DNDEBUG
 
@@ -56,7 +56,7 @@ CFLAGS = \
 CFLAGS_DEBUG = \
 -Wcast-qual -Wswitch -Werror-implicit-function-declaration \
 -Wall -Wextra -Wundef -Wbad-function-cast -Wcast-align -Wstrict-prototypes \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -std=c99  -U__STRICT_ANSI__ \
 -fPIC -g -O0 -UNDEBUG
 
@@ -64,26 +64,26 @@ CFLAGS_DEBUG = \
 CFLAGS_PROF = \
 -Wcast-qual -Wswitch -Werror-implicit-function-declaration \
 -Wall -Wextra -Wundef -Wbad-function-cast -Wcast-align -Wstrict-prototypes \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -std=c99 \
 -fPIC -O3 -DNDEBUG -g -pg
 
 CXXFLAGS = \
 -Wcast-qual -Wswitch \
 -Wall -Wextra -Wundef -Wcast-align \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -fPIC -O3 -DNDEBUG
 
 CXXFLAGS_DEBUG = \
 -Wcast-qual -Wswitch \
 -Wall -Wextra -Wundef -Wcast-align \
--Wno-unused \
+-Wno-unused -Wno-unused-parameter -Wno-unused-function \
 -fPIC -g -O0 -UNDEBUG
 
 AR = ar
 RANLIB = ranlib
 SED = sed # version >=4.1.x required
-M4 = m4
+PERL = perl
 INSTALL = install
 INSTALLd = install -d
 
@@ -110,4 +110,3 @@ MAKEINDEX=makeindex
 TEXI2DVI=texi2dvi
 TEXI2HTML=texi2html
 
-OCAMLPACK = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/ocamlpack

@@ -8,24 +8,9 @@
 # Please read the COPYING file packaged in the distribution.
 
 include ../Makefile.config
-
-PREFIX = $(APRON_PREFIX)
-
-# C include and lib directories
-INCDIR = $(PREFIX)/include
-LIBDIR = $(PREFIX)/lib
-BINDIR = $(PREFIX)/bin
-CAMLDIR = $(PREFIX)/lib
+include ../vars.mk
 
 SRCDIR = $(shell pwd)
-
-ifneq ($(OCAMLFIND),)
-MLGMPIDL_INCLUDE = $(shell $(OCAMLFIND) query gmp)
-MLGMPIDL_LIB = $(MLGMPIDL_INCLUDE)
-else
-MLGMPIDL_INCLUDE = $(MLGMPIDL_PREFIX)/include
-MLGMPIDL_LIB = $(MLGMPIDL_PREFIX)/lib
-endif
 
 #---------------------------------------
 # Programs
@@ -69,8 +54,10 @@ CXXSOURCES = ppl_user.cc ppl_poly.cc ppl_grid.cc
 CSOURCES = ppl_test.c
 CCINC = ppl_user.hh ppl_poly.hh ppl_grid.hh ppl_grid.h ap_ppl.h
 
-LIBS = -L$(PPL_PREFIX)/lib -lppl -L$(APRON_PREFIX) -lapron -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
-LIBS_DEBUG = -L$(PPL_PREFIX)/lib -lppl -L$(APRON_PREFIX) -lapron_debug -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
+LIBS = -L$(PPL_PREFIX)/lib -lppl -L../apron -lapron -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
+LIBS_DEBUG = -L$(PPL_PREFIX)/lib -lppl -L../apron -lapron_debug -L$(GMP_PREFIX)/lib -lgmpxx -lgmp -L$(MPFR_PREFIX)/lib -lmpfr -lstdc++ -lm
+
+OCAMLMKLIB := $(OCAMLMKLIB) -dllpath $(PPL_PREFIX)/lib
 
 #---------------------------------------
 # Rules
@@ -82,10 +69,10 @@ all: libap_ppl.so libap_ppl_debug.so
 endif
 
 mlexample.byte: mlexample.ml ppl.cma
-	$(OCAMLC) $(OCAMLFLAGS) -I $(MLGMPIDL_LIB) -I $(APRON_PREFIX)/lib -o $@ bigarray.cma gmp.cma apron.cma ppl.cma $<
+	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -I ../apron -o $@ bigarray.cma gmp.cma apron.cma ppl.cma $<
 
 mlexample.opt: mlexample.ml ppl.cmxa
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) -I $(MLGMPIDL_LIB) -I $(APRON_PREFIX)/lib -o $@ bigarray.cmxa gmp.cmxa apron.cmxa ppl.cmxa $<
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -I ../apron -o $@ bigarray.cmxa gmp.cmxa apron.cmxa ppl.cmxa $<
 
 clean:
 	/bin/rm -f *.[ao] *.so ap_ppl_test
@@ -136,9 +123,9 @@ libap_ppl_debug.a: $(subst .cc,_debug.o,$(CXXSOURCES))
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
 libap_ppl.so: $(subst .cc,.o,$(CXXSOURCES))
-	$(CXX) $(CXXFLAGS) -shared -o $@ $^ $(LIBS) -L../apron
+	$(CXX) $(CXXFLAGS) -shared -o $@ $^ $(LIBS)
 libap_ppl_debug.so: $(subst .cc,_debug.o,$(CXXSOURCES))
-	$(CXX) $(CXXFLAGS_DEBUG) -shared -o $@ $^ $(LIBS_DEBUG) -L../apron
+	$(CXX) $(CXXFLAGS_DEBUG) -shared -o $@ $^ $(LIBS_DEBUG)
 
 ifneq ($(HAS_SHARED),)
 ap_ppl_test: libap_ppl_debug.so
@@ -146,8 +133,8 @@ endif
 ap_ppl_test: libap_ppl_debug.a libap_ppl_debug.so ppl_test_debug.o
 	$(CXX) $(CXXFLAGS) -o $@ ppl_test_debug.o \
 	-L. -lap_ppl_debug \
-	-L../newpolka -L$(APRON_PREFIX)/lib -lpolkaMPQ_debug \
-	-L../apron -L$(APRON_PREFIX)/lib -lapron_debug \
+	-L../newpolka -lpolkaMPQ_debug \
+	-L../apron -lapron_debug \
 	-L$(PPL_PREFIX)/lib -lppl \
 	-L$(GMP_PREFIX)/lib -L$(MPFR_PREFIX)/lib -lgmpxx -lmpfr -lgmp -lm
 
@@ -187,13 +174,13 @@ endif
 #	bigarray.cma gmp.cma apron.cma ppl.cma \
 #	-ccopt "-L.  -L../apron -L../itv -L$(MLGMPIDL_PREFIX)/lib -L../mlapronidl"
 
-OCAMLMKLIB := $(OCAMLMKLIB) -ocamlc "$(OCAMLC) -cc $(CXX)" -ocamlopt "$(OCAMLOPT) -cc $(CXX)" -verbose
+OCAMLMKLIB := $(OCAMLMKLIB) -ocamlc "$(OCAMLC) -cc $(CXX)" -ocamlopt "$(OCAMLOPT) -cc $(CXX)"
 
 libap_ppl_caml.a dllap_ppl_caml.so: ap_ppl_caml.o libap_ppl.a
-	$(OCAMLMKLIB) -o ap_ppl_caml $+ $(LIBS)
+	$(OCAMLMKLIB) -o ap_ppl_caml $< -L. -lap_ppl $(LIBS)
 
 libap_ppl_caml_debug.a dllap_ppl_caml_debug.so: ap_ppl_caml_debug.o libap_ppl_debug.a
-	$(OCAMLMKLIB) -o ap_ppl_caml_debug $+ $(LIBS_DEBUG)
+	$(OCAMLMKLIB) -o ap_ppl_caml_debug $< -L. -lap_ppl_debug $(LIBS_DEBUG)
 
 ppl.cma: ppl.cmo libap_ppl_caml.a libap_ppl.a
 	$(OCAMLMKLIB) -o ppl -oc ap_ppl_caml ppl.cmo -L. -lap_ppl $(LIBS)

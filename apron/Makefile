@@ -1,4 +1,5 @@
 include ../Makefile.config
+include ../vars.mk
 
 #---------------------------------------
 # Directories
@@ -6,18 +7,12 @@ include ../Makefile.config
 
 SRCDIR = $(shell pwd)
 #
-PREFIX = $(APRON_PREFIX)
-#
-# C include and lib directories
-INCDIR = $(PREFIX)/include
-LIBDIR = $(PREFIX)/lib
-BINDIR = $(PREFIX)/bin
-#
 
 #---------------------------------------
 # C part
 #---------------------------------------
-ICFLAGS = -I../num -I$(GMP_PREFIX)/include -I$(MPFR_PREFIX)/include
+ICFLAGS = -I../num -I../itv -I$(GMP_PREFIX)/include	\
+-I$(MPFR_PREFIX)/include
 
 #---------------------------------------
 # Files
@@ -62,7 +57,7 @@ LIBS = -lm -L$(GMP_PREFIX)/lib -lgmp -L$(MPFR_PREFIX)/lib -lmpfr
 #---------------------------------------
 
 LIB_FILES = libapron.a libapron_debug.a
-ifneq ($(INSTALL_SHARED),)
+ifneq ($(HAS_SHARED),)
 LIB_FILES += libapron.so libapron_debug.so
 endif
 
@@ -181,7 +176,7 @@ $(C_FILES_AUX:%.c=%MPFR_debug.o) \
 
 dep: $(H_FILES)
 	for i in $(C_FILES); do		\
-		cpp $(ICFLAGS) -I../itv -MM $$i;	\
+		cpp $(ICFLAGS) -MM $$i;	\
 	done
 
 #--------------------------------------------------------------
@@ -195,35 +190,35 @@ dep: $(H_FILES)
 #---------------------------------------
 
 %.o: %.c %.h
-	$(CC) $(CFLAGS) $(ICFLAGS)  -I../itv -c $<
+	$(CC) $(CFLAGS) $(ICFLAGS) -c $<
 
 %MPQ.o: %.c %.h
-	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -I../num -I../itv -I. -c $< -o $@
+	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -I. -c $< -o $@
 %D.o: %.c %.h
-	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_DOUBLE -I../num -I../itv -I. -c $< -o $@
+	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_DOUBLE -I. -c $< -o $@
 %Dl.o: %.c %.h
-	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_LONGDOUBLE -I../num -I../itv -I. -c $< -o $@
+	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_LONGDOUBLE -I. -c $< -o $@
 %MPFR.o: %.c %.h
-	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPFR -I../num -I../itv -I. -c $< -o $@
+	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPFR -I. -c $< -o $@
 
 %_debug.o: %.c %.h
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS)  -I../itv -c -o $@ $<
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -c -o $@ $<
 
 %MPQ_debug.o: %.c %.h
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPQ -I../num -I../itv -I. -c -o $@ $< -o $@
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPQ -I. -c -o $@ $< -o $@
 %D_debug.o: %.c %.h
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_DOUBLE -I../num -I../itv -I. -c -o $@ $< -o $@
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_DOUBLE -I. -c -o $@ $< -o $@
 %Dl_debug.o: %.c %.h
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_LONGDOUBLE -I../num -I../itv -I. -c -o $@ $< -o $@
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_LONGDOUBLE -I. -c -o $@ $< -o $@
 %MPFR_debug.o: %.c %.h
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPFR -I../num -I../itv -I. -c -o $@ $< -o $@
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPFR -I. -c -o $@ $< -o $@
 
 #---------------------------------------
 # dependencies (generated with make depend)
 #---------------------------------------
 
 depend: $(C_FILES) $(H_FILES)
-	$(CC) $(ICFLAGS) -I../num -E -MM $(C_FILES)
+	$(CC) $(ICFLAGS) -E -MM $(C_FILES)
 
 
 ap_scalar.o: ap_scalar.c ap_scalar.h ap_config.h

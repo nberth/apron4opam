@@ -1,4 +1,5 @@
 include ../Makefile.config
+include ../vars.mk
 
 #---------------------------------------
 # Directories
@@ -9,13 +10,6 @@ SRCDIR = $(shell pwd)
 #
 PREFIX = $(APRON_PREFIX)
 #
-ifneq ($(OCAMLFIND),)
-MLGMPIDL_INCLUDE = $(shell $(OCAMLFIND) query gmp)
-MLGMPIDL_LIB = $(MLGMPIDL_INCLUDE)
-else
-MLGMPIDL_INCLUDE = $(MLGMPIDL_PREFIX)/include
-MLGMPIDL_LIB = $(MLGMPIDL_PREFIX)/lib
-endif
 
 #---------------------------------------
 # CAML part
@@ -27,10 +21,11 @@ OCAMLINC = -I $(MLGMPIDL_LIB)
 # C part
 #---------------------------------------
 ICFLAGS = \
--I$(MLGMPIDL_INCLUDE) -I../apron \
--I$(GMP_PREFIX)/include \
--I$(MPFR_PREFIX)/include \
--I$(CAML_PREFIX) -I$(CAMLIDL_PREFIX)
+-I $(MLGMPIDL_INCLUDE) -I ../apron \
+-I $(GMP_PREFIX)/include \
+-I $(MPFR_PREFIX)/include \
+-I $(CAML_PREFIX) \
+-I $(CAMLIDL_PREFIX)
 
 #---------------------------------------
 # Files

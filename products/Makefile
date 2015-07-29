@@ -1,16 +1,7 @@
 include ../Makefile.config
-
-PREFIX = $(APRON_PREFIX)
+include ../vars.mk
 
 SRCDIR = $(shell pwd)
-
-ifneq ($(OCAMLFIND),)
-MLGMPIDL_INCLUDE = $(shell $(OCAMLFIND) query gmp)
-MLGMPIDL_LIB = $(MLGMPIDL_INCLUDE)
-else
-MLGMPIDL_INCLUDE = $(MLGMPIDL_PREFIX)/include
-MLGMPIDL_LIB = $(MLGMPIDL_PREFIX)/lib
-endif
 
 #---------------------------------------
 # Flags
@@ -49,7 +40,7 @@ CAML_TO_INSTALL := polkaGrid.mli polkaGrid.cmi polkaGrid.cma libpolkaGrid_caml.a
 ifneq ($(HAS_OCAMLOPT),)
 CAML_TO_INSTALL += polkaGrid.cmxa polkaGrid.a
 endif
-ifneq ($(INSTALL_SHARED),)
+ifneq ($(HAS_SHARED),)
 CAML_TO_INSTALL += libap_pkgrid.so libap_pkgrid_debug.so dllpolkaGrid_caml.so
 endif
 endif
@@ -137,10 +128,10 @@ libap_pkgrid_debug.so: ap_pkgrid_debug.o
 OCAMLMKLIB := $(OCAMLMKLIB) -ocamlc "$(OCAMLC) -cc $(CXX)" -ocamlopt "$(OCAMLOPT) -cc $(CXX)" -verbose
 
 libpolkaGrid_caml.a dllpolkaGrid_caml.so: polkaGrid_caml.o libap_pkgrid.a
-	$(OCAMLMKLIB) -o polkaGrid_caml $+ $(LIBS)
+	$(OCAMLMKLIB) -o polkaGrid_caml $< -L. -lap_pkgrid $(LIBS)
 
 libpolkaGrid_caml_debug.a dllpolkaGrid_caml_debug.so: polkaGrid_caml_debug.o libap_pkgrid_debug.a
-	$(OCAMLMKLIB) -o polkaGrid_caml_debug $+ $(LIBS_DEBUG)
+	$(OCAMLMKLIB) -o polkaGrid_caml_debug $< -L. -lap_pkgrid_debug $(LIBS_DEBUG)
 
 #---------------------------------------
 # ML rules

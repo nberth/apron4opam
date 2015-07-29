@@ -8,23 +8,9 @@
 # Please read the COPYING file packaged in the distribution.
 
 include ../Makefile.config
-
-PREFIX = $(APRON_PREFIX)
-
-# C include and lib directories
-INCDIR = $(PREFIX)/include
-LIBDIR = $(PREFIX)/lib
-BINDIR = $(PREFIX)/bin
+include ../vars.mk
 
 SRCDIR = $(shell pwd)
-
-ifneq ($(OCAMLFIND),)
-MLGMPIDL_INCLUDE = $(shell $(OCAMLFIND) query gmp)
-MLGMPIDL_LIB = $(MLGMPIDL_INCLUDE)
-else
-MLGMPIDL_INCLUDE = $(MLGMPIDL_PREFIX)/include
-MLGMPIDL_LIB = $(MLGMPIDL_PREFIX)/lib
-endif
 
 #---------------------------------------
 # Programs
@@ -60,8 +46,8 @@ CCINC = oct_internal.h oct_fun.h
 # trigers a whole recompilation
 #DEPS = $(APRON_PREFIX)/include/ap_abstract0.h
 
-LIBS = -L../apron -L$(APRON_PREFIX) -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
-LIBS_DEBUG = -L../apron -L$(APRON_PREFIX) -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
+LIBS = -L../apron -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
+LIBS_DEBUG = -L../apron -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm 
 
 #---------------------------------------
 # Rules
@@ -103,7 +89,7 @@ MPQ: liboctMPQ.a liboctMPQ_debug.a octtestMPQ
 D: liboctD.a liboctD_debug.a octtestD
 Dl: liboctDl.a liboctDl_debug.a octtestDl
 MPFR: liboctMPFR.a liboctMPFR_debug.a octtestMPFR
-ifneq ($(INSTALL_SHARED),)
+ifneq ($(HAS_SHARED),)
 Il: liboctIl.so liboctIl_debug.so
 Ill: liboctIll.so liboctIll_debug.so
 MPZ: liboctMPZ.so liboctMPZ_debug.so
@@ -181,17 +167,15 @@ liboct%_debug.a: $(subst .c,%_debug.o,$(CCSOURCES))
 	$(RANLIB) $@
 
 liboct%.so: $(subst .c,%.o,$(CCSOURCES))
-	$(CC) $(CFLAGS) -shared -o $@ $^ $(LIBS) -L../apron
+	$(CC) $(CFLAGS) -shared -o $@ $^ $(LIBS)
 
 liboct%_debug.so: $(subst .c,%_debug.o,$(CCSOURCES))
-	$(CC) $(CFLAGS) -shared -o $@ $^ $(LIBS_DEBUG) -L../apron
+	$(CC) $(CFLAGS) -shared -o $@ $^ $(LIBS_DEBUG)
 
-ifeq ($(HAS_SHARED),)
+ifneq ($(HAS_SHARED),)
 octtest%: liboct%_debug.so
-else
-octtest%: liboct%_debug.a
 endif
-octtest%: oct_test%.o
+octtest%: oct_test%.o liboct%_debug.a
 	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -o $@ oct_test$*.o \
 	-L. -loct$*_debug \
 	-L../newpolka -lpolkaMPQ_debug \
@@ -215,9 +199,9 @@ octtest%: oct_test%.o
 %Ill_debug.o: %.c $(CCINC) $(DEPS)
 	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_LONGLONGINT -c -o $@ $<
 %MPZ.o: %.c $(CCINC) $(DEPS)
-	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPZ -I$(GMP_PREFIX)/include -c -o $@ $<
+	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPZ -c -o $@ $<
 %MPZ_debug.o: %.c $(CCINC) $(DEPS)
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPZ -I$(GMP_PREFIX)/include -c -o $@ $<
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPZ -c -o $@ $<
 
 %Ri.o: %.c $(CCINC) $(DEPS)
 	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_LONGRAT -c -o $@ $<
@@ -228,9 +212,9 @@ octtest%: oct_test%.o
 %Rll_debug.o: %.c $(CCINC) $(DEPS)
 	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_LONGLONGRAT -c -o $@ $<
 %MPQ.o: %.c $(CCINC) $(DEPS)
-	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -I$(GMP_PREFIX)/include -c -o $@ $<
+	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
 %MPQ_debug.o: %.c $(CCINC) $(DEPS)
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPQ -I$(GMP_PREFIX)/include -c -o $@ $<
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -DNUM_MPQ -c -o $@ $<
 
 %D.o: %.c $(CCINC) $(DEPS)
 	$(CC) $(CFLAGS) $(ICFLAGS) -DNUM_DOUBLE -c -o $@ $<
@@ -296,8 +280,6 @@ endif
 #octrun%: oct.cma liboct_caml.a
 #	$(OCAMLC) -noautolink $(OCAMLFLAGS) $(OCAMLINC) -o $@ -make-runtime bigarray.cma gmp.cma apron.cma oct.cma -ccopt "-L. -L$(MLGMPIDL_PREFIX)/lib -L../mlapronidl -L../apron -L../itv -L$(MPFR_PREFIX)/lib -L$(GMP_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml" -cclib "-loct_caml -loct$* -lapron_caml -lapron -lgmp_caml -lmpfr -lgmp -lbigarray -lcamlidl"
 
-OCAMLMKLIB := $(OCAMLMKLIB) -verbose
-
 oct%.cma: oct.cmo liboct%_caml.a liboct%.a
 	$(OCAMLMKLIB) -o oct$* -oc oct$*_caml oct.cmo -L. -loct$* $(LIBS)
 
@@ -305,10 +287,10 @@ oct%.cmxa oct%.a: oct.cmx liboct%_caml.a liboct%.a
 	$(OCAMLMKLIB) -o oct$* -oc oct$*_caml oct.cmx -L. -loct$* $(LIBS)
 
 liboct%_caml.a dlloct%_caml.so: oct_caml.o liboct%.a
-	$(OCAMLMKLIB) -o oct$*_caml $+ $(LIBS)
+	$(OCAMLMKLIB) -o oct$*_caml $< -L. -loct$* $(LIBS)
 
 liboct%_caml_debug.a dlloct%_caml_debug.so: oct_caml_debug.o liboct%_debug.a
-	$(OCAMLMKLIB) -o oct$*_caml_debug $+ $(LIBS_DEBUG)
+	$(OCAMLMKLIB) -o oct$*_caml_debug $< -L. -loct$*_debug $(LIBS_DEBUG)
 
 oct.ml oct.mli oct_caml.c: oct.idl perlscript_c.pl perlscript_caml.pl ../mlapronidl/*.idl
 	mkdir -p tmp
