@@ -1,36 +1,12 @@
 include ../Makefile.config
-
-#---------------------------------------
-# Directories
-#---------------------------------------
-
-SRCDIR = $(shell pwd)
-#
-#
-PREFIX = $(APRON_PREFIX)
-#
-ifneq ($(OCAMLFIND),)
-MLGMPIDL_INCLUDE = $(shell $(OCAMLFIND) query gmp)
-MLGMPIDL_LIB = $(MLGMPIDL_INCLUDE)
-else
-MLGMPIDL_INCLUDE = $(MLGMPIDL_PREFIX)/include
-MLGMPIDL_LIB = $(MLGMPIDL_PREFIX)/lib
-endif
-
-#---------------------------------------
-# CAML part
-#---------------------------------------
-
-OCAMLINC = -I $(MLGMPIDL_LIB)
+include ../vars.mk
 
 #---------------------------------------
 # C part
 #---------------------------------------
-ICFLAGS = \
--I$(MLGMPIDL_INCLUDE) -I../apron \
--I$(GMP_PREFIX)/include \
--I$(MPFR_PREFIX)/include \
--I$(CAML_PREFIX) -I$(CAMLIDL_PREFIX)
+
+ICFLAGS = $(APRON_ICFLAGS) $(MP_ICFLAGS) $(ML_ICFLAGS)
+LDFLAGS += $(APRON_LIFLAGS) $(MP_LIFLAGS)
 
 #---------------------------------------
 # Files
@@ -70,8 +46,8 @@ MLLIB_TOINSTALL += dllapron_caml.so
 endif
 CCINC_TOINSTALL = apron_caml.h
 
-LIBS = -L$(APRON_PREFIX)/lib -lapron -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
-LIBS_DEBUG = -L$(APRON_PREFIX)/lib -lapron_debug -L$(MPFR_PREFIX)/lib -lmpfr -L$(GMP_PREFIX)/lib -lgmp -lm
+LIBS = -lapron -lmpfr -lgmp -lm
+LIBS_DEBUG = -lapron_debug -lmpfr -lgmp -lm
 
 #---------------------------------------
 # Rules
@@ -116,18 +92,18 @@ distclean: clean
 
 uninstall:
 ifeq ($(OCAMLFIND),)
-	/bin/rm -f $(MLLIB_TOINSTALL:%=$(APRON_PREFIX)/lib/%)
-	/bin/rm -f $(CCLIB_TOINSTALL:%=$(APRON_PREFIX)/lib/%) libapron*.so
-	/bin/rm -f $(CCINC_TOINSTALL:%=$(APRON_PREFIX)/include/%)
+	/bin/rm -f $(MLLIB_TOINSTALL:%=$(APRON_LIB)/%)
+	/bin/rm -f $(CCLIB_TOINSTALL:%=$(APRON_LIB)/%) libapron*.so
+	/bin/rm -f $(CCINC_TOINSTALL:%=$(APRON_INCLUDE)/%)
 endif
 
 install: $(MLLIB_TOINSTALL) $(CCLIB_TOINSTALL) $(CCINC_TOINSTALL)
 ifeq ($(OCAMLFIND),)
-	mkdir -p $(APRON_PREFIX)/lib
-	mkdir -p $(APRON_PREFIX)/include
-	for i in $(CCLIB_TOINSTALL); do if test -f $$i; then cp -f $$i $(APRON_PREFIX)/lib; fi; done
-	$(INSTALL) $(CCINC_TOINSTALL) $(APRON_PREFIX)/include
-	for i in $(MLLIB_TOINSTALL); do if test -f $$i; then cp -f $$i $(APRON_PREFIX)/lib; fi; done
+	mkdir -p $(APRON_LIB)
+	mkdir -p $(APRON_INCLUDE)
+	for i in $(CCLIB_TOINSTALL); do if test -f $$i; then cp -f $$i $(APRON_LIB); fi; done
+	$(INSTALL) $(CCINC_TOINSTALL) $(APRON_INCLUDE)
+	for i in $(MLLIB_TOINSTALL); do if test -f $$i; then cp -f $$i $(APRON_LIB); fi; done
 endif
 
 #---------------------------------------
@@ -135,23 +111,21 @@ endif
 #---------------------------------------
 
 apron.cma: apron.cmo libapron_caml.a
-	$(OCAMLMKLIB) -ocamlc "$(OCAMLC)" -verbose -o apron -oc apron_caml apron.cmo $(LIBS) -L../apron
+	$(OCAMLMKLIB) -o apron -oc apron_caml apron.cmo $(LIBS)
 
 apron.cmxa apron.a: apron.cmx libapron_caml.a
-	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o apron -oc apron_caml apron.cmx $(LIBS) -L../apron
+	$(OCAMLMKLIB) -o apron -oc apron_caml apron.cmx $(LIBS)
 
 apron.d.cmxa apron.d.a: apron.cmx libapron_caml_debug.a
-	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o apron.d -oc apron_caml_debug apron.cmx $(LIBS_DEBUG) -L../apron
+	$(OCAMLMKLIB) -o apron.d -oc apron_caml_debug apron.cmx $(LIBS_DEBUG)
+
+dllapron%.so: libapron%.a
 
 libapron_caml.a: $(CCMODULES:%=%.o)
-	$(AR) rc $@ $^
-	$(RANLIB) $@
-libapron_caml_debug.a: $(CCMODULES:%=%_debug.o)
-	$(AR) rc $@ $^
-	$(RANLIB) $@
+	$(OCAMLMKLIB) $(CCMODULES:%=%.o) $(LDFLAGS) $(LIBS) -o apron_caml
 
-dllapron_caml.so: $(CCMODULES:%=%.o) ../apron/libapron.so
-	$(CC) $(CFLAGS) -shared -o $@ $(CCMODULES:%=%.o) $(LIBS) -L../apron
+libapron_caml_debug.a: $(CCMODULES:%=%_debug.o)
+	$(OCAMLMKLIB) $(CCMODULES:%=%_debug.o) $(LDFLAGS) $(LIBS_DEBUG) -o apron_caml_debug
 
 #---------------------------------------
 # CAML rules
@@ -174,7 +148,7 @@ apron_parser.ml apron_parser.mli: apron_parser.mly
 
 .PHONY: html
 apron_ocamldoc.mli: introduction.odoc $(MLMODULES:%=%.mli)
-	$(OCAMLPACK) -o apron_ocamldoc -title "APRON library" -intro introduction.odoc -intf $(MLMODULES)
+	sh $(OCAMLPACK) -o $@ -title "APRON Library" -intro introduction.odoc $(MLMODULES)
 	$(SED) -i -e 's/{5/{6/g;s/{4/{5/g;s/{3/{4/g;s/{2/{3/g;s/{1/{2/g' $@
 
 mlapronidl.pdf: mlapronidl.dvi
@@ -204,9 +178,9 @@ html: mlapronidl.odoc introduction.mli $(IDLMODULES:%=%.mli) parser.mli $(MLMODU
 #---------------------------------------
 
 %.o: %.c apron_caml.h
-	$(CC) $(CFLAGS) $(ICFLAGS) -fPIC -c $<
+	$(CC) $(CFLAGS) $(ICFLAGS) -c $< -o $@
 %_debug.o: %.c apron_caml.h
-	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -fPIC -c -o $@ $<
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) -c $< -o $@
 
 #---------------------------------------
 # IDL generic rules
@@ -216,7 +190,7 @@ html: mlapronidl.odoc introduction.mli $(IDLMODULES:%=%.mli) parser.mli $(MLMODU
 %.ml %.mli %_caml.c: %.idl macros.pl perlscript_c.pl perlscript_caml.pl
 	mkdir -p tmp
 	cp $*.idl tmp/$*.idl
-	$(CAMLIDL) -no-include -prepro "$(PERL) macros.pl" -I $(SRCDIR) tmp/$*.idl
+	$(CAMLIDL) -no-include -prepro "$(PERL) macros.pl" tmp/$*.idl
 	$(PERL) perlscript_c.pl < tmp/$*_stubs.c >$*_caml.c
 	$(PERL) perlscript_caml.pl < tmp/$*.ml >$*.ml;
 	$(PERL) perlscript_caml.pl < tmp/$*.mli >$*.mli
