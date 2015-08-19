@@ -1,6 +1,6 @@
 include Makefile.config
 PKGNAME = apron
-VERSION_STR = 20150729
+VERSION_STR = 20150819
 
 include vars.mk
 
